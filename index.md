@@ -26,11 +26,4 @@ Techniques discussed may be incomplete, ineffective, or rendered obsolete withou
 </span>
 
 ### Writing
-
 - [Why This Exists (and why it is not a product)](blog/why-this-exists.md)
-
-<footer>
-  <p>
-    © GOTT Labs · Independent Research · Assertions backed by evidence, not optimism
-  </p>
-</footer>
