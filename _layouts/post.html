@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ page.title }} · GOTT Labs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ site.baseurl }}/style.css">
-  <link rel="icon" type="image/png" href="{{ site.baseurl }}/assets/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} · Gott Labs</title>
+	<link rel="icon" type="image/png" href="{{ site.baseurl }}/assets/favicon.png">
+    <link rel="stylesheet" href="{{ site.baseurl }}/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <main>
-    <header>
-      <h1>{{ page.title }}</h1>
-      {% if page.subtitle %}
-      <h2>{{ page.subtitle }}</h2>
-      {% endif %}
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #ff0000;">
+        <a href="{{ '/' | relative_url }}" style="color: #ff0000; font-family: 'Cinzel', serif; font-size: 1.5em; text-decoration: none;">Gott Labs</a>
+        <a href="https://github.com/gottlabs/home" target="_blank" style="color: #ff0000; border: 1px solid #ff0000; padding: 5px 10px; text-decoration: none; font-weight: bold;">GitHub</a>
     </header>
 
-    <article>
-      {{ content }}
+    <article style="padding: 20px;">
+        <h1>{{ page.title }}</h1>
+        <p style="color: #ff6666; font-style: italic;">Published: {{ page.date | date: "%B %d, %Y" }}</p>
+        {{ content }}
+        <p><a href="{{ '/' | relative_url }}" style="color: #ff0000;">← Back to Home</a></p>
     </article>
 
-    <aside class="marginalia">
-      <p>Nota bene: conclusions may age poorly.</p>
-    </aside>
-
     <footer>
-      <p>
-        Published by GOTT Labs · No calls to action were issued
-      </p>
+        &copy; {{ site.time | date: "%Y" }} GOTT Labs · Independent Research · Assertions backed by evidence, not optimism
     </footer>
-  </main>
 </body>
 </html>
