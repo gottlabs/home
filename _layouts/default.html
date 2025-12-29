@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ page.title }} · GOTT Labs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1><a href="/">{{ site.title }}</a></h1>
+      {% if page.subtitle %}
+      <h2>{{ page.subtitle }}</h2>
+      {% endif %}
+    </header>
+
+    {{ content }}
+
+    <footer>
+      <p>
+        © GOTT Labs · Independent Research · Assertions backed by evidence, not optimism
+      </p>
+    </footer>
+  </main>
+</body>
+</html>
