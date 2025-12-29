@@ -1,6 +1,20 @@
+
 title: GOTT Labs
 description: Independent cybersecurity research focused on threat techniques and defensive reality.
+
 markdown: kramdown
 theme: null
 permalink: pretty
 baseurl: "/home"
+url: "https://gottlabs.github.io"
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: default
