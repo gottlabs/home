@@ -15,16 +15,14 @@ This site exists to publish research. Any resemblance to marketing is coincident
 - Incident response under imperfect conditions
 - Defensive tradeoffs and empirical outcomes
 
-### Research Disclaimer
-
-<span class="disclaimer">
-Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance.
-</span>
-
-<span class="disclaimer">
-Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
-</span>
-
 ### Writing
 - [Why This Exists (and why it is not a product)](_posts/2025-12-28-the_why.md)
 - [Demo_post](_posts/demo_post.md)
+
+### Research Disclaimer
+<span class="disclaimer">
+Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance.
+</span>
+<span class="disclaimer">
+Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
+</span>
