@@ -452,11 +452,8 @@ Incident response checklist when MongoBleed exploitation is confirmed:
 **Methodological Note**: Analysis based on public vulnerability disclosure, proof-of-concept exploit code from joe-desimone/mongobleed, and community detection research from Eric Capuano and Florian Roth. Real-world exploitation behavior may differ from documented proof-of-concept patterns. Investigations should not rely solely on behavioral signatures.
 
 ### References
-- **Vulnerability Disclosure**: OX Security - https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/
-- **Original PoC**: joe-desimone/mongobleed - https://github.com/joe-desimone/mongobleed
-- **Detection Research**: Eric Capuano - https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847
-- **Detection Tool**: Neo23x0/mongobleed-detector - https://github.com/Neo23x0/mongobleed-detector
-- **MongoDB Security Advisory**: MongoDB Inc. - https://www.mongodb.com/alerts
-- **Exposure Metrics**: Censys reports 87,000+ exposed instances; Shodan estimates 200,000+
-- **Ubisoft Breach Coverage**: BleepingComputer - https://www.bleepingcomputer.com/news/security/massive-rainbow-six-siege-breach-gives-players-billions-of-credits/
-- **Additional Analysis**: Varonis, Arctic Wolf, Wiz, Security researchers via The Stack
+- [**Vulnerability Disclosure**: OX Security](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/)
+- [**Original PoC**: joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed)
+- [**Detection Research**: Eric Capuano](https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847)
+- [**Detection Tool**: Neo23x0/mongobleed-detector](https://github.com/Neo23x0/mongobleed-detector)
+- [**Ubisoft Breach Coverage**: BleepingComputer](https://www.bleepingcomputer.com/news/security/massive-rainbow-six-siege-breach-gives-players-billions-of-credits/)
