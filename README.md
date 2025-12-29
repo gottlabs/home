@@ -1,1 +1,1 @@
-[# home](https://gottlabs.github.io/home/)
+https://gottlabs.github.io/home/
