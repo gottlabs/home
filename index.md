@@ -17,8 +17,8 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 ### Writing
 
-- [Why This Exists (and why it is not a product)]({{ site.baseurl }}/2025/12/28/the_why.html)
-- [Template Showcase]({{ site.baseurl }}/2025/12/29/demo_post.html)
+- [Why This Exists (and why it is not a product)]({{ site.baseurl }}/2025/12/28/the_why.md)
+- [Template Showcase]({{ site.baseurl }}/2025/12/29/demo_post.md)
 
 ### Research Disclaimer
 
