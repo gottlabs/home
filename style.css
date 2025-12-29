@@ -1,3 +1,53 @@
+/* Navigation Bar */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #3c3c3c;
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-icon {
+  color: #d4d4d4;
+  text-decoration: none;
+  font-size: 1.3rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.nav-icon:hover {
+  color: #569cd6;
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.nav-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Adjust body padding to account for fixed navbar */
+body {
+  padding-top: 5rem;
+}
+
 /* Base Typography & Colors - Jupyter Dark Theme */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -27,22 +77,45 @@ header {
 }
 
 h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   color: #ffffff;
   margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(86, 156, 214, 0.3);
+  position: relative;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #569cd6, #4ec9b0);
+  box-shadow: 0 0 10px rgba(86, 156, 214, 0.5);
 }
 
 h1 a {
   color: #ffffff;
   border: none;
   text-decoration: none;
+  background: linear-gradient(135deg, #569cd6 0%, #4ec9b0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
 }
 
 h1 a:hover {
-  color: #569cd6;
+  background: linear-gradient(135deg, #4ec9b0 0%, #569cd6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   border: none;
+  text-shadow: 0 0 30px rgba(78, 201, 176, 0.4);
 }
 
 h2 {
@@ -310,6 +383,7 @@ hr {
 @media (max-width: 768px) {
   body {
     padding: 1rem;
+    padding-top: 5rem;
   }
   
   main {
@@ -324,5 +398,22 @@ hr {
     position: static;
     display: block;
     margin-bottom: 0.5rem;
+  }
+  
+  .top-nav {
+    padding: 0.8rem 1rem;
+  }
+  
+  .nav-left, .nav-right {
+    gap: 1rem;
+  }
+  
+  .nav-icon {
+    font-size: 1.1rem;
+  }
+  
+  .nav-icon svg {
+    width: 18px;
+    height: 18px;
   }
 }
