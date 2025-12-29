@@ -26,4 +26,4 @@ Techniques discussed may be incomplete, ineffective, or rendered obsolete withou
 </span>
 
 ### Writing
-- [Why This Exists (and why it is not a product)](blog/why-this-exists.md)
+- [Why This Exists (and why it is not a product)](_posts/2025-12-28-the_why.md)
