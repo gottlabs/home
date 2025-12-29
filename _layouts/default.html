@@ -16,18 +16,13 @@
       <h2>{{ page.subtitle }}</h2>
       {% endif %}
     </header>
-
-    <!-- Page/post content -->
     {{ content }}
-
-    <!-- Optional marginalia for posts -->
     {% if page.layout == "post" %}
     <aside class="marginalia">
       <p>Nota bene: conclusions may age poorly.</p>
     </aside>
     {% endif %}
 
-    <!-- Footer -->
     <footer>
       <p>© GOTT Labs · Independent Research · Assertions backed by evidence, not optimism</p>
     </footer>
