@@ -7,14 +7,6 @@ title: Home
 
 This site exists to publish research. Any resemblance to marketing is coincidental.
 
-### Research Focus
-
-- The real threats at your edge
-- Threat technique analysis and documentation
-- Detection engineering and validation
-- Incident response under imperfect conditions
-- Defensive tradeoffs and empirical outcomes
-
 ### Writing
 - [Why This Exists (and why it is not a product)]({{ site.baseurl }}/2025/12/28/the_why)
 - [Template Showcase]({{ site.baseurl }}/2025/12/29/demo_post)
