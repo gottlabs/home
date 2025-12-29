@@ -3,3 +3,4 @@ description: Independent cybersecurity research focused on threat techniques and
 markdown: kramdown
 theme: null
 permalink: pretty
+baseurl: "/home"
