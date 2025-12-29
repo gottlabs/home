@@ -9,25 +9,28 @@
   <link rel="icon" type="image/png" href="{{ site.baseurl }}/assets/favicon.png">
 </head>
 <body>
-  <header>
-    <h1><a href="{{ site.baseurl }}/">{{ site.title }}</a></h1>
-    {% if page.subtitle %}
-    <h2>{{ page.subtitle }}</h2>
-    {% endif %}
-  </header>
+  <main>
+    <header>
+      <h1><a href="{{ site.baseurl }}/">{{ site.title }}</a></h1>
+      {% if page.subtitle %}
+      <h2>{{ page.subtitle }}</h2>
+      {% endif %}
+    </header>
 
-  <div class="container">
+    <!-- Page/post content -->
     {{ content }}
 
+    <!-- Optional marginalia for posts -->
     {% if page.layout == "post" %}
     <aside class="marginalia">
       <p>Nota bene: conclusions may age poorly.</p>
     </aside>
     {% endif %}
-  </div>
 
-  <footer>
-    <p>© GOTT Labs · Independent Research · Assertions backed by evidence, not optimism</p>
-  </footer>
+    <!-- Footer -->
+    <footer>
+      <p>© GOTT Labs · Independent Research · Assertions backed by evidence, not optimism</p>
+    </footer>
+  </main>
 </body>
 </html>
