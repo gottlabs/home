@@ -9,7 +9,7 @@
 <body>
   <main>
     <header>
-      <h1><a href="/">{{ site.title }}</a></h1>
+      <h1><a href="{{ site.baseurl }}/">{{ site.title }}</a></h1>
       {% if page.subtitle %}
       <h2>{{ page.subtitle }}</h2>
       {% endif %}
@@ -18,9 +18,7 @@
     {{ content }}
 
     <footer>
-      <p>
-        © GOTT Labs · Independent Research · Assertions backed by evidence, not optimism
-      </p>
+      <p>© GOTT Labs · Independent Research · Assertions backed by evidence, not optimism</p>
     </footer>
   </main>
 </body>
