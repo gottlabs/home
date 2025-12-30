@@ -404,6 +404,22 @@ article {
   padding: 1rem 0;
 }
 
+/* Post Header Image */
+.post-header-image {
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #3c3c3c;
+}
+
+.post-header-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Tables - Jupyter Style */
 table {
   border-collapse: collapse;
