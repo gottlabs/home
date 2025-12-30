@@ -58,6 +58,12 @@
       {% endif %}
     </header>
 
+    {% if page.header_image %}
+    <div class="post-header-image">
+      <img src="{{ site.baseurl }}{{ page.header_image }}" alt="{{ page.title }}">
+    </div>
+    {% endif %}
+
     <article>
       {{ content }}
     </article>
