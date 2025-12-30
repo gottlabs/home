@@ -94,15 +94,9 @@ def detect_mongobleed_exploitation(logs):
 ```
 Legitimate applications consistently send metadata with every connection, and their velocity is measured in single-digit connections per minute. The difference between legitimate and attack traffic is three to five orders of magnitude.
 
-### Forensic Limitations
-The detection signature works well for the public proof-of-concept. It breaks down under several conditions:
-
 **Log Retention Issues**
-
 MongoDB logs rotate. If logs rotate aggressively or attackers clear them, evidence is lost. Many organizations retain MongoDB logs for 7-14 days. If exploitation occurred before detection, the evidence may already be gone.
-
 Detection script output when logs are missing:
-
 ```bash
 $ ./mongobleed-detector.sh /var/log/mongodb/
 
@@ -155,26 +149,24 @@ Even when exploitation is confirmed, determining what was leaked is difficult. T
 
 The **"Assume Compromise"** approach is not paranoia. It's practical. Memory disclosure vulnerabilities leak unpredictable data. Without complete visibility into what was in the heap at the time of exploitation, conservative assumptions are appropriate.
 
+
+
 ### The Community Edition Blind Spot
 MongoDB Community Edition, the version most organizations run, has no audit logging. The default verbosity level is set to `-1`, which limits operational logging to warnings and errors only. This significantly reduces forensic visibility. Even with increased verbosity, Community Edition auditing is limted, but not net zero
 
-
-### Analyzing Community Edition Logs
-
+### Analyzing Community Edition Logs: Post Exploitation Reviews
 Organizations running Community Edition should examine `mongod.log` for evidence of unauthorized access. Three critical log components to search for:
 
 **NETWORK** - Connection and disconnection events:
 ```bash
 grep "NETWORK" /var/log/mongodb/mongod.log
 ```
-
 Example output:
 ```
 2025-12-26T14:23:19.127+0000 I NETWORK  [listener] connection accepted from 203.0.113.42:54321 #8234 (12 connections now open)
 2025-12-26T14:23:19.128+0000 I NETWORK  [conn8234] received client metadata from 203.0.113.42:54321 conn8234: {}
 2025-12-26T14:23:19.142+0000 I NETWORK  [conn8234] end connection 203.0.113.42:54321 (11 connections now open)
 ```
-
 The absence of "received client metadata" indicates the connection never sent metadata; a MongoBleed exploitation indicator.
 
 **ACCESS** - Authentication and authorization events (requires verbosity >= 0):
@@ -187,14 +179,11 @@ Example output:
 2025-12-26T14:31:04.891+0000 I ACCESS   [conn8235] Successfully authenticated as principal admin on admin from client 203.0.113.42:54782
 2025-12-26T14:31:45.127+0000 I ACCESS   [conn8235] Unauthorized: not authorized on users to execute command { find: "accounts", filter: {}, $db: "users" }
 ```
-
 Note: Without increasing verbosity from the default `-1`, successful authentication events may not be logged at all.
-
 **COMMAND** - Query execution (requires verbosity >= 0):
 ```bash
 grep "COMMAND" /var/log/mongodb/mongod.log
 ```
-
 Example output:
 ```
 2025-12-26T14:31:45.234+0000 I COMMAND  [conn8235] command users.accounts command: find { find: "accounts", filter: {}, $db: "users" } planSummary: COLLSCAN keysExamined:0 docsExamined:47293 cursorExhausted:1 numYields:370 nreturned:47293 reslen:8947234 locks:{ Global: { acquireCount: { r: 742 } }, Database: { acquireCount: { r: 371 } }, Collection: { acquireCount: { r: 371 } } } protocol:op_msg 127ms
@@ -219,25 +208,17 @@ Detection based on metadata absence is effective but incomplete. It identifies t
 An attacker can probe a MongoDB instance, extract sensitive credentials, and use those credentials through normal authenticated channels. The exploitation event is logged. The subsequent credential abuse looks like legitimate traffic.
 
 ### Public Proof-of-Concept Exploits
-
-Two primary public exploits exist for MongoBleed:
-
 **1. joe-desimone/mongobleed (Original PoC)**
-
 Released December 25, 2025 by security researcher Joe Desimone.
 Repository: https://github.com/joe-desimone/mongobleed
-
 The tool includes a Docker Compose configuration for testing against a vulnerable MongoDB instance. This exploit is responsible for the behavioral signature discussed in this post: thousands of connections per minute with no client metadata.
 
 ### Detection Tooling
-
 Two primary tools exist for MongoBleed detection:
 
 **Velociraptor Artifact** (Linux.Detection.CVE202514847.MongoBleed)
-
 Developed by Eric Capuano (Recon InfoSec), this artifact parses MongoDB logs using Velociraptor's incident response platform.
 Reference: https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847
-
 ```bash
 # Deploy and execute via Velociraptor
 $ velociraptor artifacts collect \
@@ -249,10 +230,8 @@ $ velociraptor artifacts collect \
 ```
 
 **Standalone Script** (Neo23x0/mongobleed-detector)
-
 Developed by Florian Roth (creator of THOR APT Scanner), this shell script analyzes MongoDB JSON logs offline.
 Repository: https://github.com/Neo23x0/mongobleed-detector
-
 ```bash
 # Clone and run
 git clone https://github.com/Neo23x0/mongobleed-detector.git
@@ -265,7 +244,6 @@ chmod +x mongobleed-detector.sh
 # Remote analysis via SSH
 python3 mongobleed-remote.py --hosts-file targets.txt --user admin
 ```
-
 ```bash
 # Offline analysis of collected logs
 $ ./mongobleed-detector.sh /evidence/mongodb-logs/
