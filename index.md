@@ -19,7 +19,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/why-exists.png" alt="Why This Exists">
+    <img src="{{ site.baseurl }}/assets/images/the_why.png" alt="Why This Exists">
   </div>
 </div>
 
