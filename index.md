@@ -12,7 +12,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/28/the_why">Why This Exists (and why it is not a product)</a></h4>
-    <p>An exploration of motivation, methodology, and the deliberate rejection of commodification in security research.</p>
+    <p>Detection logic degrades, telemetry is incomplete, response processes are interrupted, and threat techniques adapt faster than slide decks</p>
     <div class="post-tags">
       <span class="tag">why</span>
       <span class="tag">should</span>
