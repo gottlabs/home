@@ -3,6 +3,7 @@ layout: post
 title: "MongoBleed Forensics"
 subtitle: "What exploitation leaves behind and what it doesn't"
 date: 2025-12-29
+header_image: /assets/images/CVE-2025-14847.png
 ---
 
 CVE-2025-14847, dubbed MongoBleed, is a memory disclosure vulnerability in MongoDB's zlib compression handling that allows unauthenticated attackers to extract uninitialized heap memory. The vulnerability has been actively exploited since late December 2025, with approximately 87,000 exposed instances identified globally.
