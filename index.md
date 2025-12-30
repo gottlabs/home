@@ -17,7 +17,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag">why</span>
       <span class="tag">should</span>
       <span class="tag">i</span>
-      <span class="tag">case</span>
+      <span class="tag">care</span>
     </div>
   </div>
   <div class="post-image">
