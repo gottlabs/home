@@ -19,7 +19,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/the_why.png" alt="Why This Exists">
+    <img src="{{ '/assets/images/the_why.png' | relative_url }}" alt="Why This Exists">
   </div>
 </div>
 
@@ -34,7 +34,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2025-14847.png" alt="MongoBleed">
+    <img src="{{ '/assets/images/CVE-2025-14847.png' | relative_url }}" alt="MongoBleed">
   </div>
 </div>
 
