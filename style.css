@@ -228,6 +228,15 @@ a:hover {
   font-size: 0.9rem;
 }
 
+/* Post Date */
+.post-date {
+  display: block;
+  font-size: 0.85rem;
+  color: #858585;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
 .post-image {
   flex-shrink: 0;
   width: 300px;
