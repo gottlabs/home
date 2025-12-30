@@ -15,9 +15,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
     <p>Detection logic degrades, telemetry is incomplete, response processes are interrupted, and threat techniques adapt faster than slide decks</p>
     <div class="post-tags">
       <span class="tag">why</span>
-      <span class="tag">should</span>
-      <span class="tag">i</span>
-      <span class="tag">care</span>
     </div>
   </div>
   <div class="post-image">
