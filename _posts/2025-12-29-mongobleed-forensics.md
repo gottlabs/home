@@ -373,37 +373,10 @@ For organizations running MongoDB in production:
 **Baseline Requirements (All Editions):**
 - **Increase verbosity from default `-1` to `0` minimum** for Community Edition
 - Enable JSON logging (default in 4.4+)
-- Forward MongoDB logs to centralized infrastructure
-- Retain logs for minimum 90 days
+- Forward MongoDB logs to a SIEM
+- Retain logs for a minimum of 90 days
 - Implement network flow logging for database connections
-- Document credential rotation procedures before incidents occur
-- Test log analysis tooling before forensic investigations require it
-
-**Community Edition Specific:**
-- Set `systemLog.verbosity: 0` at minimum (default is `-1`)
-- Increase component-specific verbosity for security-relevant events:
-- Configure log rotation to prevent evidence loss:
-- Use external log rotation (logrotate) with compression and long retention
-- Regularly search for NETWORK, ACCESS, and COMMAND strings in logs
-- Implement application-level logging for database operations
-
-**Enterprise-Specific Recommendations:**
-- Enable audit logging at minimum "moderate" verbosity
-- Filter audit logs to capture authentication and data access events
-- Forward audit logs to separate infrastructure from standard logs
-- Retain audit logs for minimum 180 days (regulatory compliance may require longer)
-- Test audit log analysis procedures quarterly
-- Document performance baseline with auditing enabled
-
-**Community Edition Constraints:**
-Organizations running Community Edition should acknowledge forensic limitations and take proactive measures:
-- **Increase default verbosity**: The default `-1` verbosity suppresses authentication and command logs
-- Post-exploitation activity reconstruction requires increased logging (verbosity `0` minimum)
-- Network-level logging (flow data, proxy logs) becomes critical
-- Application-level logging must capture database operations
-- Incident response assumes worst-case breach scope without detailed logs
-- Regularly grep `mongod.log` for NETWORK, ACCESS, and COMMAND entries
-- Monitor for connections without client metadata as MongoBleed indicators
+- Test and validate analysis tooling before you require it
 
 Incident response checklist when MongoBleed exploitation is confirmed:
 ```markdown
