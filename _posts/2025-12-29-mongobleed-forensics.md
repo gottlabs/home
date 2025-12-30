@@ -26,7 +26,7 @@ def decompress_message(compressed_data, claimed_size):
 Attackers send compressed messages with inflated uncompressedSize claims, MongoDB allocates large buffers based on these claims, but zlib only fills the start of the buffer with actual data. The server then treats the entire buffer as valid, allowing BSON parsing to read uninitialized memory.
 
 ### What Gets Leaked
-The leaked data may include MongoDB internal logs, WiredTiger storage engine configuration, database credentials, session tokens, API keys, and user data from previous operations. The heap is dynamic—what's exposed depends entirely on what was allocated there previously.
+The leaked data may include MongoDB internal logs, WiredTiger storage engine configuration, database credentials, session tokens, API keys, and user data from previous operations. The heap is dynamic; what's exposed depends entirely on what was allocated there previously.
 
 Example output from a proof-of-concept exploit:
 
@@ -48,7 +48,7 @@ Example output from a proof-of-concept exploit:
 This is not a comprehensive data exfiltration. It's memory fragments. Sometimes useful. Often not.
 
 ### Detection Signatures
-The public proof-of-concept exploit (joe-desimone/mongobleed) establishes many rapid connections—tens of thousands per minute—with each connection probing for memory leaks. More importantly, the exploit never sends client metadata.
+The public proof-of-concept exploit (joe-desimone/mongobleed) establishes many rapid connections, tens of thousands per minute with each connection probing for memory leaks. More importantly, the exploit never sends client metadata.
 
 Every legitimate MongoDB driver sends a metadata message (event ID 51800) immediately after connecting. The exploit does not. This creates a reliable behavioral signature:
 
@@ -155,7 +155,7 @@ Even when exploitation is confirmed, determining what was leaked is difficult. T
 The **"Assume Compromise"** approach is not paranoia. It's practical. Memory disclosure vulnerabilities leak unpredictable data. Without complete visibility into what was in the heap at the time of exploitation, conservative assumptions are appropriate.
 
 ### The Community Edition Blind Spot
-MongoDB Community Edition—the version most organizations run—has no audit logging. The default verbosity level is set to `-1`, which limits operational logging to warnings and errors only. This significantly reduces forensic visibility.
+MongoDB Community Edition, the version most organizations run, has no audit logging. The default verbosity level is set to `-1`, which limits operational logging to warnings and errors only. This significantly reduces forensic visibility.
 
 To increase logging verbosity for investigations:
 
@@ -204,7 +204,7 @@ Example output:
 2025-12-26T14:23:19.142+0000 I NETWORK  [conn8234] end connection 203.0.113.42:54321 (11 connections now open)
 ```
 
-The absence of "received client metadata" indicates the connection never sent metadata—a MongoBleed exploitation indicator.
+The absence of "received client metadata" indicates the connection never sent metadata; a MongoBleed exploitation indicator.
 
 **ACCESS** - Authentication and authorization events (requires verbosity >= 0):
 ```bash
@@ -229,7 +229,7 @@ Example output:
 2025-12-26T14:31:45.234+0000 I COMMAND  [conn8235] command users.accounts command: find { find: "accounts", filter: {}, $db: "users" } planSummary: COLLSCAN keysExamined:0 docsExamined:47293 cursorExhausted:1 numYields:370 nreturned:47293 reslen:8947234 locks:{ Global: { acquireCount: { r: 742 } }, Database: { acquireCount: { r: 371 } }, Collection: { acquireCount: { r: 371 } } } protocol:op_msg 127ms
 ```
 
-This shows a complete collection scan that returned 47,293 documents—potential data exfiltration.
+This shows a complete collection scan that returned 47,293 documents; potential data exfiltration.
 
 **Enterprise with Verbose Auditing:**
 ```bash
@@ -266,7 +266,7 @@ This exploit is responsible for the behavioral signature discussed in this post:
 
 Following the initial disclosure, additional proof-of-concept implementations appeared on GitHub and security forums. Most follow the same basic pattern but with variations in scanning strategy and output formatting.
 
-The low barrier to exploitation—requiring only Python and network connectivity—accelerated widespread scanning activity within hours of the original PoC release.
+The low barrier to exploitation requiring only Python and network connectivity accelerated widespread scanning activity within hours of the original PoC release.
 
 ### Detection Tooling
 
