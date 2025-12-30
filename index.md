@@ -34,7 +34,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/mongobleed.png" alt="Mongobleed">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-14847.png" alt="Mongobleed">
   </div>
 </div>
 
