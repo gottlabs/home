@@ -11,6 +11,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed-forensics">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+    <span class="post-date">December 29, 2025</span>
     <p>MongoBleed, a discussion of forensics and considerations</p>
     <div class="post-tags">
       <span class="tag">CVE-2025-14847</span>
@@ -25,12 +26,13 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/12/29/2025-12-31-cve2025-61882">Oracle's Really Bad October: The CVE-2025-61882 Story</a></h4>
+    <h4><a href="{{ site.baseurl }}/2025/12/31/cve2025-61882">Oracle's Really Bad October: The CVE-2025-61882 Story</a></h4>
+    <span class="post-date">December 31, 2025</span>
     <p>The Zero-Day That Reminded Everyone Why ERP Means "Everyone's Really Pwned"</p>
     <div class="post-tags">
       <span class="tag">CVE-2025-61882</span>
       <span class="tag">oracle_ebs</span>
-      <span class="tag">forensics</span>
+      <span class="tag">rce</span>
     </div>
   </div>
   <div class="post-image">
