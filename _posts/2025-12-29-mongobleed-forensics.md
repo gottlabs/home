@@ -8,7 +8,7 @@ header_image: /assets/images/CVE-2025-14847.png
 
 CVE-2025-14847, better known as MongoBleed, is a memory disclosure vulnerability in MongoDB's zlib compression handling that lets unauthenticated attackers pull uninitialized heap memory straight out of the server. It's conceptually simple, trivial to exploit, and annoying to investigate. A proof-of-concept dropped on Christmas Day 2025, courtesy of Joe Desimone.
 
-## The Vulnerability
+### The Vulnerability
 
 MongoBleed exploits MongoDB's network transport compression layer through maliciously crafted compressed payloads that cause the server to miscalculate decompressed data length. The bug lives in how MongoDB handles zlib-compressed network messages.
 
@@ -34,7 +34,7 @@ The attack works like this:
 
 The heap is whatever was there before. Previous database operations, credentials, session tokens, internal states, anything that happened to occupy that memory region. You don't get to choose what you extract. You get what the heap gives you.
 
-## Affected Versions and Patch Status
+### Affected Versions and Patch Status
 
 This hits a wide range of MongoDB versions:
 
@@ -43,7 +43,7 @@ This hits a wide range of MongoDB versions:
 
 End-of-life versions (3.6, 4.0, 4.2) aren't getting patches. If you're running those, the exposure is permanent. Upgrade or accept the risk.
 
-## Proof-of-Concept Details
+### Proof-of-Concept Details
 
 The original PoC is available at [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed) on GitHub. It includes a Docker Compose setup for testing against vulnerable instances, which is convenient for understanding the attack mechanics without wrecking production systems.
 
@@ -69,15 +69,15 @@ Example output from a successful exploitation run:
 
 That's 8KB of heap data extracted in seconds. Sometimes you get useful credentials. Sometimes you get kernel statistics. Sometimes you get garbage. The heap doesn't care about your operational needs.
 
-## Exploitation Mechanics
+### Exploitation Mechanics
 
 The exploitation process is straightforward but relies on understanding how MongoDB handles compressed network messages.
 
-### Network Transport Layer
+## Network Transport Layer
 
 MongoDB supports multiple compression algorithms for network traffic: snappy, zlib, and zstd. The vulnerability specifically affects zlib compression. When a client connects and negotiates zlib compression, subsequent messages can trigger the memory disclosure.
 
-### Message Structure
+## Message Structure
 
 MongoDB wire protocol messages have this structure:
 
@@ -93,7 +93,7 @@ When compression is enabled, the message body becomes:
 
 The `uncompressedSize` field is where the attack happens. This is a 32-bit integer that tells MongoDB how much space to allocate for decompression. MongoDB trusts this value.
 
-### The Attack Sequence
+## The Attack Sequence
 
 1. **Connection establishment**: Attacker connects to MongoDB without authentication
 2. **Compression negotiation**: Declares zlib support in the handshake
@@ -107,7 +107,7 @@ The `uncompressedSize` field is where the attack happens. This is a 32-bit integ
 
 The BSON parser doesn't validate that the data makes sense. It just reads the buffer and tries to construct valid BSON objects from whatever bytes it finds. When it encounters uninitialized memory, it interprets those random bytes as BSON structures and returns them.
 
-### What Gets Leaked
+## What Gets Leaked
 
 The leaked data depends entirely on what was previously allocated in that heap region. Common findings include:
 
@@ -122,9 +122,9 @@ The leaked data depends entirely on what was previously allocated in that heap r
 
 The key point: **this is not deterministic**. You can't reliably target specific data. You spray and pray, hoping something useful lands in the extracted fragments.
 
-## Considerations and Limitations
+### Considerations and Limitations
 
-### Exploitation Limitations
+## Exploitation Limitations
 
 **No authentication required**: This is pre-auth, which makes it accessible from anywhere the MongoDB port is exposed. If your instance is internet-facing, anyone can attempt exploitation.
 
@@ -136,7 +136,7 @@ The key point: **this is not deterministic**. You can't reliably target specific
 
 **High-volume detection signature**: The public PoC generates thousands of connections per minute. This is extremely noisy and easily detected in any environment with connection monitoring.
 
-### Forensic Limitations
+## Forensic Limitations
 
 Here's where it gets uncomfortable.
 
@@ -150,9 +150,9 @@ Here's where it gets uncomfortable.
 
 This creates a detection/response paradox: you can identify when exploitation attempts occurred, but you cannot prove what data was accessed or what the blast radius actually is.
 
-## Detection, Hunting and Blast assessments
+### Detection, Hunting and Blast assessments
 
-### Behavioral Signatures
+## Behavioral Signatures
 
 The public PoC has a distinctive signature: thousands of connections per minute with no client metadata.
 
@@ -223,7 +223,7 @@ HIGH     203.0.113.42     8,234      0          0.0%       112,453
 
 That's a clear indicator when the public exploit is used: zero metadata messages, 112,453 connections per minute. Legitimate applications don't behave like this.
 
-### Log Analysis for Community Edition
+## Log Analysis for Community Edition
 
 If you're running Community Edition, your forensic options are limited but not zero. Three critical log components exist:
 
@@ -254,7 +254,7 @@ Example:
 
 That's a complete collection scan returning 47,293 documents. If you see this after exploitation was detected, that's potential data exfiltration.
 
-### Detection Tools
+## Detection Tools
 
 Two primary tools exist for MongoBleed detection:
 
@@ -282,7 +282,7 @@ chmod +x mongobleed-detector.sh
 
 Both tools analyze the same behavioral signatures: connection velocity and metadata absence. Both suffer from the same limitations: log dependency, evasion susceptibility, and inability to quantify breach impact.
 
-### Evasion Considerations
+## Evasion Considerations
 
 The metadata-based detection is effective against the public PoC but not against adaptive attackers. A motivated threat actor can modify the exploit to send fake client metadata after connecting, making the traffic appear more legitimate.
 
@@ -310,17 +310,17 @@ This reduces exploitation speed but improves stealth. Detection based solely on 
 
 The uncomfortable truth: **detection identifies exploitation attempts with the public PoC, not all exploitation, and definitely not data exfiltration success**.
 
-## Remediation and Workarounds
+### Remediation and Workarounds
 
 Eliminate the exposure of the MongoDB service
-### Patching
+## Patching
 
 Apply the fixed versions:
 - 8.2.3, 8.0.17, 7.0.28, 6.0.27, 5.0.32, 4.4.30
 
 If you're on end-of-life versions (3.6, 4.0, 4.2), you need to upgrade to a supported version. There's no patch coming.
 
-### Workaround: Disable zlib Compression
+## Workaround: Disable zlib Compression
 
 If immediate patching isn't possible, disable zlib compression:
 
@@ -339,7 +339,7 @@ mongod --networkMessageCompressors snappy
 
 This prevents exploitation but may impact performance in bandwidth-constrained environments. The trade-off between security and performance isn't always straightforward, especially in high-throughput production systems.
 
-### Forensic Readiness Improvements
+## Forensic Readiness Improvements
 
 For organizations running MongoDB in production, the following baseline configurations improve forensic capability:
 
@@ -356,14 +356,14 @@ For organizations running MongoDB in production, the following baseline configur
 - Forward audit logs to tamper-proof storage
 - Implement real-time alerting on suspicious patterns
 
-### Post-Exploitation Response Checklist
+## Post-Exploitation Response Checklist
 
 When MongoBleed exploitation is confirmed:
 
 ```markdown
-## Confirmed Exploitation Response
+### Confirmed Exploitation Response
 
-### Immediate Actions
+## Immediate Actions
 - [ ] Isolate affected MongoDB instances from the network
 - [ ] Preserve all available logs before rotation
 - [ ] Snapshot VM/container for forensic analysis
@@ -371,7 +371,7 @@ When MongoBleed exploitation is confirmed:
 - [ ] Verify MongoDB edition (Community vs Enterprise)
 - [ ] Check audit logging status if Enterprise
 
-### Evidence Collection
+## Evidence Collection
 - [ ] Collect all MongoDB JSON logs (entire retention period)
 - [ ] Check current verbosity level: `db.getLogComponents()`
 - [ ] If verbosity was `-1`, acknowledge limited forensic evidence
@@ -381,7 +381,7 @@ When MongoBleed exploitation is confirmed:
 - [ ] Collect network flow data (NetFlow, firewall logs)
 - [ ] Collect process execution logs (auditd, sysmon)
 
-### Scope Assessment (Edition-Dependent)
+## Scope Assessment (Edition-Dependent)
 - [ ] Identify all source IPs with suspicious connection patterns
 - [ ] Correlate exploitation timeframe with other security events
 - [ ] Review what data was in memory during exposure window
@@ -389,14 +389,14 @@ When MongoBleed exploitation is confirmed:
 - [ ] **If Community Edition**: Assume worst-case data access
 - [ ] **If Enterprise with audit**: Analyze actual operations performed
 
-### Credential Rotation (Assume Compromise)
+## Credential Rotation (Assume Compromise)
 - [ ] Rotate all MongoDB authentication credentials
 - [ ] Rotate application database credentials
 - [ ] Rotate API keys/tokens that may have been in heap memory
 - [ ] Review and rotate service account credentials
 - [ ] Search for use of old credentials in authentication logs
 
-### Lateral Movement Analysis
+## Lateral Movement Analysis
 - [ ] Check for unauthorized access using potentially leaked credentials
 - [ ] Review authentication logs across environment for suspicious activity
 - [ ] Scan for indicators of compromise across infrastructure
@@ -407,7 +407,7 @@ When MongoBleed exploitation is confirmed:
 
 The "assume compromise" approach isn't paranoia. It's practical. Memory disclosure vulnerabilities leak unpredictable data. Without complete visibility into heap state at the time of exploitation, conservative assumptions are appropriate.
 
-## Closing Assessment
+### Closing Assessment
 
 MongoBleed is trivial to exploit, widely applicable, and difficult to investigate forensically. The exploitation mechanics are straightforward. The forensic artifacts are clear when the public proof-of-concept is used. They become ambiguous when attackers adapt their tooling.
 
@@ -428,7 +428,7 @@ If you're running Community Edition with default verbosity at `-1` and 7-day log
 
 Patch if you can. Disable zlib if you can't. Improve your logging before you need it. And maybe consider whether Community Edition is giving you the forensic capability you think you have.
 
-## References
+### References
 
 - **Vulnerability Disclosure**: [OX Security](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/)
 - **Original PoC**: [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed)
