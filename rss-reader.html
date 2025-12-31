@@ -55,7 +55,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Security Research Feed · GOTT Labs</title>
-  <link rel="icon" type="image/png" href="{{ site.baseurl }}/assets/favicon.png">
+  <link rel="icon" type="image/png" href="/home/assets/favicon.png">
   <style>
     * {
       margin: 0;
@@ -448,7 +448,6 @@
         <div class="tab" onclick="filterFeed('watchtowr')">watchTowr Labs</div>
         <div class="tab" onclick="filterFeed('unit42')">Unit 42</div>
         <div class="tab" onclick="filterFeed('security-soup')">Security Soup</div>
-        <div class="tab" onclick="filterFeed('reddit')">r/blueteamsec</div>
         <div class="tab" onclick="filterFeed('microsoft')">Microsoft Research</div>
         <div class="tab" onclick="filterFeed('sophos')">Sophos</div>
       </div>
@@ -479,11 +478,6 @@
         id: 'security-soup',
         url: 'https://security-soup.net/feed/',
         title: 'Security Soup'
-      },
-      {
-        id: 'reddit',
-        url: 'https://www.reddit.com/r/blueteamsec/.rss',
-        title: 'r/blueteamsec'
       },
       {
         id: 'microsoft',
@@ -649,8 +643,17 @@
 
         const results = await Promise.all(promises);
         
+        // Use a Set to track unique articles by link to avoid duplicates
+        const seenLinks = new Set();
+        
         results.forEach(result => {
           result.items.forEach(item => {
+            // Skip if we've already seen this link
+            if (seenLinks.has(item.link)) {
+              return;
+            }
+            seenLinks.add(item.link);
+            
             allArticles.push({
               feedId: result.feedId,
               source: result.feedTitle,
