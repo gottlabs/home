@@ -236,8 +236,6 @@ Example output:
 "{""t"":{""$date"":""2025-12-27T20:53:21.321+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":51800,   ""ctx"":""conn24"",""msg"":""client metadata"",""attr"":{""remote"":""203.0.113.42:54188"",""client"":""conn24"",""negotiatedCompressors"":[],""doc"":{""application"":{""name"":""mongodump""},""driver"":{""name"":""mongo-go-driver"",""version"":""1.16.0""},""os"":{""type"":""linux"",""architecture"":""amd64""},""platform"":""go1.21.12""}}}
 ```
 
-The absence of "received client metadata" indicates the connection never sent metadata—a MongoBleed indicator.
-
 **"ACCESS" events** - Authentication:
 
 Example:
