@@ -36,7 +36,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2025-61882.png" alt="oracle_ebs">
+    <img src="{{ site.baseurl }}/assets/images/cve2025-61882.png" alt="oracle_ebs">
   </div>
 </div>
 
