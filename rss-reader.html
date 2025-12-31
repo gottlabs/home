@@ -46,17 +46,88 @@
 
     .controls {
       display: flex;
+      flex-direction: column;
       gap: 1rem;
       margin-bottom: 2rem;
-      flex-wrap: wrap;
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .time-filter {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 1.2rem;
+      background: #252526;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .time-filter label {
+      font-size: 0.9rem;
+      color: #d4d4d4;
+      white-space: nowrap;
+    }
+
+    .time-filter input[type="range"] {
+      width: 200px;
+      height: 6px;
+      background: #3c3c3c;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .time-filter input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #569cd6;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .time-filter input[type="range"]::-webkit-slider-thumb:hover {
+      background: #4ec9b0;
+      transform: scale(1.2);
+    }
+
+    .time-filter input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #569cd6;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .time-filter input[type="range"]::-moz-range-thumb:hover {
+      background: #4ec9b0;
+      transform: scale(1.2);
+    }
+
+    .time-value {
+      font-weight: 600;
+      color: #4ec9b0;
+      min-width: 80px;
+      text-align: right;
     }
 
     .filter-tabs {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
-      flex: 1;
     }
 
     .tab {
@@ -221,9 +292,13 @@
         grid-template-columns: 1fr;
       }
 
-      .controls {
+      .top-controls {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .time-filter {
+        min-width: 100%;
       }
 
       .filter-tabs {
@@ -244,6 +319,15 @@
     </header>
 
     <div class="controls">
+      <div class="top-controls">
+        <div class="time-filter">
+          <label for="timeRange">Show posts from:</label>
+          <input type="range" id="timeRange" min="1" max="365" value="30" oninput="updateTimeFilter(this.value)">
+          <span class="time-value" id="timeValue">30 days</span>
+        </div>
+        <button class="refresh" onclick="loadAllFeeds()">↻ Refresh</button>
+      </div>
+      
       <div class="filter-tabs">
         <div class="tab active" onclick="filterFeed('all')">All Feeds</div>
         <div class="tab" onclick="filterFeed('watchtowr')">watchTowr Labs</div>
@@ -253,7 +337,6 @@
         <div class="tab" onclick="filterFeed('microsoft')">Microsoft Research</div>
         <div class="tab" onclick="filterFeed('sophos')">Sophos</div>
       </div>
-      <button class="refresh" onclick="loadAllFeeds()">↻ Refresh</button>
     </div>
 
     <div id="error" style="display: none;" class="error"></div>
@@ -301,6 +384,14 @@
 
     let allArticles = [];
     let currentFilter = 'all';
+    let daysBack = 30;
+
+    function updateTimeFilter(days) {
+      daysBack = parseInt(days);
+      const label = daysBack === 1 ? '1 day' : `${daysBack} days`;
+      document.getElementById('timeValue').textContent = label;
+      renderArticles();
+    }
 
     function showError(message) {
       const errorDiv = document.getElementById('error');
@@ -322,17 +413,28 @@
     function renderArticles() {
       const articlesDiv = document.getElementById('articles');
       
+      // Calculate cutoff date
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+      
+      // Filter by feed
       let filtered = currentFilter === 'all' 
         ? allArticles 
         : allArticles.filter(a => a.feedId === currentFilter);
+      
+      // Filter by date
+      filtered = filtered.filter(article => {
+        const articleDate = new Date(article.pubDate);
+        return articleDate >= cutoffDate;
+      });
 
       if (filtered.length === 0) {
-        articlesDiv.innerHTML = '<div class="empty-state">No articles found</div>';
+        articlesDiv.innerHTML = `<div class="empty-state">No articles found in the last ${daysBack} days</div>`;
         document.getElementById('articleCount').textContent = '';
         return;
       }
 
-      document.getElementById('articleCount').textContent = `${filtered.length} articles`;
+      document.getElementById('articleCount').textContent = `${filtered.length} articles (last ${daysBack} days)`;
 
       articlesDiv.innerHTML = filtered.map(article => {
         const pubDate = new Date(article.pubDate);
