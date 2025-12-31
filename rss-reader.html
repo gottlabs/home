@@ -242,6 +242,28 @@
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .category-select {
+      padding: 0.6rem 1rem;
+      background: #2d2d30;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      color: #d4d4d4;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 200px;
+    }
+
+    .category-select:hover {
+      border-color: #569cd6;
+    }
+
+    .category-select:focus {
+      outline: none;
+      border-color: #569cd6;
     }
 
     .tab {
@@ -445,11 +467,17 @@
       
       <div class="filter-tabs">
         <div class="tab active" onclick="filterFeed('all')">All Feeds</div>
-        <div class="tab" onclick="filterFeed('watchtowr')">watchTowr Labs</div>
-        <div class="tab" onclick="filterFeed('unit42')">Unit 42</div>
-        <div class="tab" onclick="filterFeed('security-soup')">Security Soup</div>
-        <div class="tab" onclick="filterFeed('microsoft')">Microsoft Research</div>
-        <div class="tab" onclick="filterFeed('sophos')">Sophos</div>
+        <select class="category-select" id="categorySelect" onchange="filterByCategory(this.value)">
+          <option value="">Filter by Category...</option>
+          <option value="offensive">Offensive Security</option>
+          <option value="threat-intel">Threat Intelligence</option>
+          <option value="defensive">Defensive Security</option>
+          <option value="researchers">Individual Researchers</option>
+          <option value="general">General Research</option>
+        </select>
+        <select class="category-select" id="feedSelect" onchange="filterByFeed(this.value)">
+          <option value="">Filter by Feed...</option>
+        </select>
       </div>
     </div>
 
@@ -462,38 +490,199 @@
   </div>
 
   <script>
-    // Hardcoded security research feeds
+    // Hardcoded security research feeds organized by category
     const FEEDS = [
+      // Offensive Security & Exploit Research
       {
         id: 'watchtowr',
         url: 'https://labs.watchtowr.com/rss/',
-        title: 'watchTowr Labs'
+        title: 'watchTowr Labs',
+        category: 'offensive'
       },
+      {
+        id: 'project-zero',
+        url: 'https://googleprojectzero.blogspot.com/feeds/posts/default',
+        title: 'Project Zero',
+        category: 'offensive'
+      },
+      {
+        id: 'portswigger',
+        url: 'https://portswigger.net/research/rss',
+        title: 'PortSwigger Research',
+        category: 'offensive'
+      },
+      {
+        id: 'rapid7',
+        url: 'https://blog.rapid7.com/rss/',
+        title: 'Rapid7 Blog',
+        category: 'offensive'
+      },
+      {
+        id: 'bishop-fox',
+        url: 'https://bishopfox.com/blog/feed',
+        title: 'Bishop Fox',
+        category: 'offensive'
+      },
+      {
+        id: 'trail-of-bits',
+        url: 'https://blog.trailofbits.com/feed/',
+        title: 'Trail of Bits',
+        category: 'offensive'
+      },
+      // Threat Intelligence & APT Research
       {
         id: 'unit42',
         url: 'https://unit42.paloaltonetworks.com/feed/',
-        title: 'Unit 42'
+        title: 'Unit 42',
+        category: 'threat-intel'
       },
+      {
+        id: 'mandiant',
+        url: 'https://cloud.google.com/blog/topics/threat-intelligence/rss',
+        title: 'Mandiant',
+        category: 'threat-intel'
+      },
+      {
+        id: 'crowdstrike',
+        url: 'https://www.crowdstrike.com/blog/feed/',
+        title: 'CrowdStrike',
+        category: 'threat-intel'
+      },
+      {
+        id: 'recorded-future',
+        url: 'https://www.recordedfuture.com/feed',
+        title: 'Recorded Future',
+        category: 'threat-intel'
+      },
+      {
+        id: 'talos',
+        url: 'https://blog.talosintelligence.com/rss/',
+        title: 'Cisco Talos',
+        category: 'threat-intel'
+      },
+      // Defensive Security & Detection
       {
         id: 'security-soup',
         url: 'https://security-soup.net/feed/',
-        title: 'Security Soup'
+        title: 'Security Soup',
+        category: 'defensive'
       },
+      {
+        id: 'sans-isc',
+        url: 'https://isc.sans.edu/rssfeed.xml',
+        title: 'SANS ISC',
+        category: 'defensive'
+      },
+      {
+        id: 'huntress',
+        url: 'https://www.huntress.com/blog/rss.xml',
+        title: 'Huntress Labs',
+        category: 'defensive'
+      },
+      {
+        id: 'red-canary',
+        url: 'https://redcanary.com/blog/feed/',
+        title: 'Red Canary',
+        category: 'defensive'
+      },
+      // Individual Researchers
+      {
+        id: 'orange-tsai',
+        url: 'https://blog.orange.tw/feeds/posts/default',
+        title: 'Orange Tsai',
+        category: 'researchers'
+      },
+      {
+        id: 'liveoverflow',
+        url: 'https://liveoverflow.com/blog/index.xml',
+        title: 'LiveOverflow',
+        category: 'researchers'
+      },
+      // General Research
       {
         id: 'microsoft',
         url: 'https://www.microsoft.com/en-us/research/feed/',
-        title: 'Microsoft Research'
+        title: 'Microsoft Research',
+        category: 'general'
       },
       {
         id: 'sophos',
         url: 'https://news.sophos.com/en-us/blog/feed?id=blt6f15f4f7deaf4242',
-        title: 'Sophos News'
+        title: 'Sophos News',
+        category: 'general'
       }
     ];
 
+    const CATEGORIES = {
+      'all': 'All Feeds',
+      'offensive': 'Offensive Security',
+      'threat-intel': 'Threat Intelligence',
+      'defensive': 'Defensive Security',
+      'researchers': 'Individual Researchers',
+      'general': 'General Research'
+    };
+
     let allArticles = [];
     let currentFilter = 'all';
+    let currentCategory = '';
     let daysBack = 30;
+
+    function populateFeedDropdown() {
+      const feedSelect = document.getElementById('feedSelect');
+      feedSelect.innerHTML = '<option value="">Filter by Feed...</option>';
+      
+      FEEDS.forEach(feed => {
+        const option = document.createElement('option');
+        option.value = feed.id;
+        option.textContent = feed.title;
+        feedSelect.appendChild(option);
+      });
+    }
+
+    function filterByCategory(category) {
+      currentCategory = category;
+      currentFilter = 'all';
+      
+      // Reset dropdowns
+      document.getElementById('feedSelect').value = '';
+      
+      // Update active tab
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      
+      renderArticles();
+    }
+
+    function filterByFeed(feedId) {
+      if (!feedId) {
+        currentFilter = 'all';
+        currentCategory = '';
+        document.getElementById('categorySelect').value = '';
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelector('.tab').classList.add('active');
+      } else {
+        currentFilter = feedId;
+        currentCategory = '';
+        document.getElementById('categorySelect').value = '';
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      }
+      
+      renderArticles();
+    }
+
+    function filterFeed(filter) {
+      currentFilter = filter;
+      currentCategory = '';
+      
+      // Reset dropdowns
+      document.getElementById('categorySelect').value = '';
+      document.getElementById('feedSelect').value = '';
+      
+      // Update active tab
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      renderArticles();
+    }
 
     function updateTimeFilter(days) {
       daysBack = parseInt(days);
@@ -532,10 +721,19 @@
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysBack);
       
-      // Filter by feed
-      let filtered = currentFilter === 'all' 
-        ? allArticles 
-        : allArticles.filter(a => a.feedId === currentFilter);
+      // Filter by category or specific feed
+      let filtered = allArticles;
+      
+      if (currentCategory) {
+        // Filter by category
+        filtered = filtered.filter(a => {
+          const feed = FEEDS.find(f => f.id === a.feedId);
+          return feed && feed.category === currentCategory;
+        });
+      } else if (currentFilter !== 'all') {
+        // Filter by specific feed
+        filtered = filtered.filter(a => a.feedId === currentFilter);
+      }
       
       // Filter by date
       filtered = filtered.filter(article => {
@@ -683,6 +881,7 @@
 
     // Load feeds on page load
     document.addEventListener('DOMContentLoaded', () => {
+      populateFeedDropdown();
       loadAllFeeds();
     });
   </script>
