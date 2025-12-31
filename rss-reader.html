@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Research Feed · GOTT Labs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #3c3c3c;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #569cd6 0%, #4ec9b0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #858585;
+      font-size: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .tab {
+      padding: 0.6rem 1.2rem;
+      background: #2d2d30;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      color: #d4d4d4;
+    }
+
+    .tab:hover {
+      border-color: #569cd6;
+      background: #323233;
+    }
+
+    .tab.active {
+      background: #569cd6;
+      border-color: #569cd6;
+      color: #ffffff;
+    }
+
+    button.refresh {
+      padding: 0.6rem 1.2rem;
+      background: #4ec9b0;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    button.refresh:hover {
+      background: #569cd6;
+    }
+
+    .article-count {
+      color: #858585;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .article-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .article-tile {
+      background: #252526;
+      border: 1px solid #3c3c3c;
+      border-radius: 6px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .article-tile:hover {
+      border-color: #569cd6;
+      box-shadow: 0 4px 12px rgba(86, 156, 214, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .tile-header {
+      margin-bottom: 1rem;
+    }
+
+    .tile-source {
+      font-size: 0.75rem;
+      color: #4ec9b0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .tile-title {
+      font-size: 1.2rem;
+      color: #ffffff;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .tile-meta {
+      font-size: 0.8rem;
+      color: #858585;
+      margin-bottom: 1rem;
+    }
+
+    .tile-description {
+      color: #b5b5b5;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      flex: 1;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    .tile-footer {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #3c3c3c;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .read-more {
+      color: #569cd6;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .article-tile:hover .read-more {
+      color: #4ec9b0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: #858585;
+      font-style: italic;
+      grid-column: 1 / -1;
+    }
+
+    .error {
+      background: #2d2d30;
+      border: 1px solid #d16969;
+      border-left: 4px solid #d16969;
+      padding: 1rem;
+      border-radius: 4px;
+      color: #d16969;
+      margin-bottom: 2rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem;
+      color: #858585;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .article-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-tabs {
+        flex-direction: column;
+      }
+
+      button.refresh {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Security Research Feed</h1>
+      <p class="subtitle">Curated vulnerability research, exploitation techniques, and offensive security insights</p>
+    </header>
+
+    <div class="controls">
+      <div class="filter-tabs">
+        <div class="tab active" onclick="filterFeed('all')">All Feeds</div>
+        <div class="tab" onclick="filterFeed('watchtowr')">watchTowr Labs</div>
+        <div class="tab" onclick="filterFeed('unit42')">Unit 42</div>
+        <div class="tab" onclick="filterFeed('security-soup')">Security Soup</div>
+        <div class="tab" onclick="filterFeed('reddit')">r/blueteamsec</div>
+        <div class="tab" onclick="filterFeed('microsoft')">Microsoft Research</div>
+        <div class="tab" onclick="filterFeed('sophos')">Sophos</div>
+      </div>
+      <button class="refresh" onclick="loadAllFeeds()">↻ Refresh</button>
+    </div>
+
+    <div id="error" style="display: none;" class="error"></div>
+    <div class="article-count" id="articleCount"></div>
+
+    <div class="article-grid" id="articles">
+      <div class="loading">Loading security research articles...</div>
+    </div>
+  </div>
+
+  <script>
+    // Hardcoded security research feeds
+    const FEEDS = [
+      {
+        id: 'watchtowr',
+        url: 'https://labs.watchtowr.com/rss/',
+        title: 'watchTowr Labs'
+      },
+      {
+        id: 'unit42',
+        url: 'https://unit42.paloaltonetworks.com/feed/',
+        title: 'Unit 42'
+      },
+      {
+        id: 'security-soup',
+        url: 'https://security-soup.net/feed/',
+        title: 'Security Soup'
+      },
+      {
+        id: 'reddit',
+        url: 'https://www.reddit.com/r/blueteamsec/.rss',
+        title: 'r/blueteamsec'
+      },
+      {
+        id: 'microsoft',
+        url: 'https://www.microsoft.com/en-us/research/feed/',
+        title: 'Microsoft Research'
+      },
+      {
+        id: 'sophos',
+        url: 'https://news.sophos.com/en-us/blog/feed?id=blt6f15f4f7deaf4242',
+        title: 'Sophos News'
+      }
+    ];
+
+    let allArticles = [];
+    let currentFilter = 'all';
+
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => errorDiv.style.display = 'none', 5000);
+    }
+
+    function filterFeed(feedId) {
+      currentFilter = feedId;
+      
+      // Update active tab
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      renderArticles();
+    }
+
+    function renderArticles() {
+      const articlesDiv = document.getElementById('articles');
+      
+      let filtered = currentFilter === 'all' 
+        ? allArticles 
+        : allArticles.filter(a => a.feedId === currentFilter);
+
+      if (filtered.length === 0) {
+        articlesDiv.innerHTML = '<div class="empty-state">No articles found</div>';
+        document.getElementById('articleCount').textContent = '';
+        return;
+      }
+
+      document.getElementById('articleCount').textContent = `${filtered.length} articles`;
+
+      articlesDiv.innerHTML = filtered.map(article => {
+        const pubDate = new Date(article.pubDate);
+        const dateStr = pubDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+
+        // Clean description - remove HTML tags
+        const cleanDesc = article.description 
+          ? article.description.replace(/<[^>]*>/g, '').trim().substring(0, 250) + '...'
+          : 'No description available';
+
+        return `
+          <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="article-tile">
+            <div class="tile-header">
+              <div class="tile-source">${article.source}</div>
+              <div class="tile-title">${article.title}</div>
+              <div class="tile-meta">${dateStr}${article.author ? ` · ${article.author}` : ''}</div>
+            </div>
+            <div class="tile-description">${cleanDesc}</div>
+            <div class="tile-footer">
+              <span class="read-more">Read more →</span>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    async function loadAllFeeds() {
+      const articlesDiv = document.getElementById('articles');
+      articlesDiv.innerHTML = '<div class="loading">Loading security research articles...</div>';
+      document.getElementById('articleCount').textContent = '';
+      
+      allArticles = [];
+
+      try {
+        const promises = FEEDS.map(async (feed) => {
+          try {
+            // Try rss2json first
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=30`);
+            const data = await response.json();
+            
+            if (data.status === 'ok' && data.items && data.items.length > 0) {
+              return {
+                feedId: feed.id,
+                feedTitle: feed.title,
+                items: data.items
+              };
+            }
+            
+            // If rss2json fails, try allorigins as fallback
+            console.log(`rss2json failed for ${feed.title}, trying fallback...`);
+            const fallbackResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`);
+            const xmlText = await fallbackResponse.text();
+            
+            // Parse XML manually
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(xmlText, 'text/xml');
+            
+            const items = Array.from(xml.querySelectorAll('item, entry')).slice(0, 30).map(item => {
+              const getContent = (selectors) => {
+                for (let selector of selectors) {
+                  const el = item.querySelector(selector);
+                  if (el) return el.textContent;
+                }
+                return '';
+              };
+              
+              return {
+                title: getContent(['title']),
+                link: getContent(['link', 'link[rel="alternate"]']),
+                description: getContent(['description', 'summary', 'content']),
+                pubDate: getContent(['pubDate', 'published', 'updated']),
+                author: getContent(['author name', 'dc\\:creator', 'creator'])
+              };
+            }).filter(item => item.title && item.link);
+            
+            return {
+              feedId: feed.id,
+              feedTitle: feed.title,
+              items: items
+            };
+            
+          } catch (err) {
+            console.error(`Error loading ${feed.title}:`, err);
+            return { feedId: feed.id, feedTitle: feed.title, items: [] };
+          }
+        });
+
+        const results = await Promise.all(promises);
+        
+        results.forEach(result => {
+          result.items.forEach(item => {
+            allArticles.push({
+              feedId: result.feedId,
+              source: result.feedTitle,
+              title: item.title,
+              link: item.link,
+              description: item.description || item.content,
+              author: item.author,
+              pubDate: item.pubDate
+            });
+          });
+        });
+
+        // Sort by date, most recent first
+        allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+        if (allArticles.length === 0) {
+          articlesDiv.innerHTML = '<div class="empty-state">No articles found. Some feeds may be temporarily unavailable.</div>';
+          return;
+        }
+
+        renderArticles();
+      } catch (error) {
+        articlesDiv.innerHTML = '<div class="error">Failed to load articles. Please try again later.</div>';
+        console.error('Error loading feeds:', error);
+      }
+    }
+
+    // Load feeds on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllFeeds();
+    });
+  </script>
+</body>
+</html>
