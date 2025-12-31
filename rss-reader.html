@@ -3,13 +3,13 @@
   <!-- Top Navigation Bar -->
   <nav class="top-nav">
     <div class="nav-left">
-      <a href="/" class="nav-icon" title="Home">
+      <a href="/home/" class="nav-icon" title="Home">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
       </a>
-      <a href="/rss-reader.html" class="nav-icon" title="RSS Feed Reader">
+      <a href="/home/rss-reader.html" class="nav-icon" title="RSS Feed Reader">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 2v6h6V2"></path>
           <path d="M6.5 8a8.5 8.5 0 1 0 11 0"></path>
@@ -24,7 +24,7 @@
       </a>
     </div>
     <div class="nav-right">
-      <a href="/feed.xml" class="nav-icon" title="RSS Feed">
+      <a href="/home/feed.xml" class="nav-icon" title="RSS Feed">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 11a9 9 0 0 1 9 9"></path>
           <path d="M4 4a16 16 0 0 1 16 16"></path>
@@ -55,7 +55,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Security Research Feed · GOTT Labs</title>
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="icon" type="image/png" href="/home/assets/favicon.png">
   <style>
     * {
       margin: 0;
@@ -176,12 +176,28 @@
     }
 
     .time-filter input[type="range"] {
-      width: 200px;
+      width: 150px;
       height: 6px;
       background: #3c3c3c;
       border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
+    }
+
+    .time-filter input[type="number"] {
+      width: 70px;
+      padding: 0.4rem;
+      background: #2d2d30;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      color: #d4d4d4;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .time-filter input[type="number"]:focus {
+      outline: none;
+      border-color: #569cd6;
     }
 
     .time-filter input[type="range"]::-webkit-slider-thumb {
@@ -218,8 +234,8 @@
     .time-value {
       font-weight: 600;
       color: #4ec9b0;
-      min-width: 80px;
-      text-align: right;
+      min-width: 60px;
+      text-align: left;
     }
 
     .filter-tabs {
@@ -421,7 +437,8 @@
         <div class="time-filter">
           <label for="timeRange">Show posts from:</label>
           <input type="range" id="timeRange" min="1" max="365" value="30" oninput="updateTimeFilter(this.value)">
-          <span class="time-value" id="timeValue">30 days</span>
+          <input type="number" id="timeInput" min="1" max="365" value="30" oninput="updateTimeFromInput(this.value)">
+          <span class="time-value">days</span>
         </div>
         <button class="refresh" onclick="loadAllFeeds()">↻ Refresh</button>
       </div>
@@ -486,8 +503,14 @@
 
     function updateTimeFilter(days) {
       daysBack = parseInt(days);
-      const label = daysBack === 1 ? '1 day' : `${daysBack} days`;
-      document.getElementById('timeValue').textContent = label;
+      document.getElementById('timeInput').value = daysBack;
+      renderArticles();
+    }
+
+    function updateTimeFromInput(days) {
+      daysBack = Math.max(1, Math.min(365, parseInt(days) || 30));
+      document.getElementById('timeRange').value = daysBack;
+      document.getElementById('timeInput').value = daysBack;
       renderArticles();
     }
 
