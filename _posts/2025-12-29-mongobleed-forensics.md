@@ -231,9 +231,9 @@ If you're running Community Edition, your forensic options are limited but not z
 
 Example output:
 ```
-2025-12-26T14:23:19.127+0000 I NETWORK  [listener] connection accepted from 203.0.113.42:54321 #8234 (12 connections now open)
-2025-12-26T14:23:19.128+0000 I NETWORK  [conn8234] received client metadata from 203.0.113.42:54321 conn8234: {}
-2025-12-26T14:23:19.142+0000 I NETWORK  [conn8234] end connection 203.0.113.42:54321 (11 connections now open)
+"{""t"":{""$date"":""2025-12-27T20:53:11.142+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":22943,   ""ctx"":""listener"",""msg"":""Connection accepted"",""attr"":{""remote"":""203.0.113.42:60696"",""uuid"":{""uuid"":{""$uuid"":""75531bc6-21c8-967b-89ed-5d28e22e72f5""}},""connectionId"":21,""connectionCount"":13}}
+{""t"":{""$date"":""2025-12-27T20:53:11.144+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":22944,   ""ctx"":""conn21"",""msg"":""Connection ended"",""attr"":{""remote"":""203.0.113.42:60696"",""uuid"":{""uuid"":{""$uuid"":""75531bc6-21c8-967b-89ed-5d28e22e72f5""}},""connectionId"":21,""connectionCount"":10}}"
+"{""t"":{""$date"":""2025-12-27T20:53:21.321+00:00""},""s"":""I"",  ""c"":""NETWORK"",  ""id"":51800,   ""ctx"":""conn24"",""msg"":""client metadata"",""attr"":{""remote"":""203.0.113.42:54188"",""client"":""conn24"",""negotiatedCompressors"":[],""doc"":{""application"":{""name"":""mongodump""},""driver"":{""name"":""mongo-go-driver"",""version"":""1.16.0""},""os"":{""type"":""linux"",""architecture"":""amd64""},""platform"":""go1.21.12""}}}
 ```
 
 The absence of "received client metadata" indicates the connection never sent metadata—a MongoBleed indicator.
@@ -242,17 +242,10 @@ The absence of "received client metadata" indicates the connection never sent me
 
 Example:
 ```
-2025-12-26T14:31:04.891+0000 I ACCESS   [conn8235] Successfully authenticated as principal admin on admin from client 203.0.113.42:54782
+{""t"":{""$date"":""2025-12-27T20:04:49.119+00:00""},""s"":""I"",  ""c"":""ACCESS"",   ""id"":5486106, ""ctx"":""conn13"",""msg"":""Successfully authenticated"",""attr"":{""client"":""203.0.113.42:40898"",""isSpeculative"":true,""isClusterMember"":false,""mechanism"":""SCRAM-SHA-256"",""user"":""root"",""db"":""database1"",""result"":0,""metrics"":{""conversation_duration"":{""micros"":2213,""summary"":{""0"":{""step"":1,""step_total"":2,""duration_micros"":165},""1"":{""step"":2,""step_total"":2,""duration_micros"":30}}}},""extraInfo"":{}}}
 ```
 
-**"COMMAND" events** - Query execution:
-
-Example:
-```
-2025-12-26T14:31:45.234+0000 I COMMAND  [conn8235] command users.accounts command: find { find: "accounts", filter: {}, $db: "users" } planSummary: COLLSCAN keysExamined:0 docsExamined:47293 cursorExhausted:1 numYields:370 nreturned:47293 reslen:8947234 locks:{ Global: { acquireCount: { r: 742 } }, Database: { acquireCount: { r: 371 } }, Collection: { acquireCount: { r: 371 } } } protocol:op_msg 127ms
-```
-
-That's a complete collection scan returning 47,293 documents. If you see this after exploitation was detected, that's potential data exfiltration.
+**"COMMAND" events** - Limited based on verbosity but a good hunt if you have an increased verbosity level and want to confirm any potential DB interactions
 
 ## Detection Tools
 
