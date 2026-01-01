@@ -10,7 +10,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 ### Writing
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed_forensics">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+    <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
     <span class="post-date">December 29, 2025</span>
     <p>MongoBleed, a discussion of forensics and considerations</p>
     <div class="post-tags">
@@ -36,7 +36,23 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/cve2025-61882.png" alt="oracle_ebs">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-61882.png" alt="oracle_ebs">
+  </div>
+</div>
+
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2025/05/30/sap_netweaver_cve2025-31324">SAP NetWeaver VC (CVE-2025-31324)</a></h4>
+    <span class="post-date">May 30, 2025</span>
+    <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland"</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2025-31324</span>
+      <span class="tag">sap_netweaver</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-31324.png" alt="oracle_ebs">
   </div>
 </div>
 
