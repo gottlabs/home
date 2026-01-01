@@ -10,7 +10,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 ### Writing
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed-forensics">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+    <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed_forensics">MongoBleed Forensics (CVE-2025-14847)</a></h4>
     <span class="post-date">December 29, 2025</span>
     <p>MongoBleed, a discussion of forensics and considerations</p>
     <div class="post-tags">
