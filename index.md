@@ -26,7 +26,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/12/31/cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
+    <h4><a href="{{ site.baseurl }}/2025/12/31/oracle_ebs_cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
     <span class="post-date">December 31, 2025</span>
     <p>The Zero-Day That Reminded Everyone Why ERP Means "Everyone's Really Pwned"</p>
     <div class="post-tags">
