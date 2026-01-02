@@ -89,6 +89,22 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/02/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
+    <span class="post-date">January 2, 2026</span>
+    <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2024-47575</span>
+      <span class="tag">fortigate</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
+  </div>
+</div>
+
 ### Research Disclaimer
 <span class="disclaimer">
 Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance. Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
