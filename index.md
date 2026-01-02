@@ -7,42 +7,7 @@ title: Home
 
 This site exists to publish research. Any resemblance to marketing is coincidental.
 
-### Writing
-
-<div class="research-post">
-  <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2026/01/02/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
-    <span class="post-date">CVE Date: October 23, 2024</span>
-    <span class="post-date">Published: January 2, 2026</span>
-    <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
-    <div class="post-tags">
-      <span class="tag">CVE-2024-47575</span>
-      <span class="tag">fortigate</span>
-      <span class="tag">forensics</span>
-    </div>
-  </div>
-  <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
-  </div>
-</div>
-
-<div class="research-post">
-  <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2026/01/01/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
-    <span class="post-date">CVE Date: November 18, 2024</span>
-    <span class="post-date">Published: January 1, 2026</span>
-    <p>When Your Security Appliance Becomes the Vulnerability</p>
-    <div class="post-tags">
-      <span class="tag">CVE-2024-0012</span>
-      <span class="tag">CVE-2024-9474</span>
-      <span class="tag">panos</span>
-      <span class="tag">forensics</span>
-    </div>
-  </div>
-  <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-0012.png" alt="panos_cve">
-  </div>
-</div>
+### Research/Write-ups
 
 <div class="research-post">
   <div class="post-content">
@@ -92,6 +57,58 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
   <div class="post-image">
     <img src="{{ site.baseurl }}/assets/images/CVE-2025-31324.png" alt="sap_netweaver">
+  </div>
+</div>
+
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2025/02/01/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
+    <span class="post-date">CVE Date: January 14, 2025</span>
+    <span class="post-date">Published: February 2, 2025</span>
+    <p>When authentication is just a really aggressive suggestion</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2024-55591</span>
+      <span class="tag">fortigate</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="fortigate_cve">
+  </div>
+</div>
+
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/01/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
+    <span class="post-date">CVE Date: November 18, 2024</span>
+    <span class="post-date">Published: January 1, 2026</span>
+    <p>When Your Security Appliance Becomes the Vulnerability</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2024-0012</span>
+      <span class="tag">CVE-2024-9474</span>
+      <span class="tag">panos</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-0012.png" alt="panos_cve">
+  </div>
+</div>
+
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/02/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
+    <span class="post-date">CVE Date: October 23, 2024</span>
+    <span class="post-date">Published: January 2, 2026</span>
+    <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2024-47575</span>
+      <span class="tag">fortigate</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
   </div>
 </div>
 
