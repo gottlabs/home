@@ -59,22 +59,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/01/14/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
-    <span class="post-date">CVE Date: January 14, 2025</span>
-    <p>When authentication is just a really aggressive suggestion</p>
-    <div class="post-tags">
-      <span class="tag">CVE-2024-55591</span>
-      <span class="tag">fortigate</span>
-      <span class="tag">forensics</span>
-    </div>
-  </div>
-  <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="fortigate_cve">
-  </div>
-</div>
-
-<div class="research-post">
-  <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/11/18/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
     <span class="post-date">CVE Date: November 18, 2024</span>
     <p>When Your Security Appliance Becomes the Vulnerability</p>
