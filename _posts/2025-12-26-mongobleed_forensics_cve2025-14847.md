@@ -423,7 +423,7 @@ Patch if you can. Disable zlib if you can't. Improve your logging before you nee
 
 ### References
 
-- **Vulnerability Disclosure**: [OX Security](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/)
-- **Original PoC**: [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed)
-- **Detection Research**: [Eric Capuano - Hunting MongoBleed](https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847)
-- **Detection Tool**: [Neo23x0/mongobleed-detector](https://github.com/Neo23x0/mongobleed-detector)
+- **Vulnerability Disclosure**: [OX Security](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/?ref=https://gottlabs.github.io/home/)
+- **Original PoC**: [joe-desimone/mongobleed](https://github.com/joe-desimone/mongobleed/?ref=https://gottlabs.github.io/home/)
+- **Detection Research**: [Eric Capuano - Hunting MongoBleed](https://blog.ecapuano.com/p/hunting-mongobleed-cve-2025-14847/?ref=https://gottlabs.github.io/home/)
+- **Detection Tool**: [Neo23x0/mongobleed-detector](https://github.com/Neo23x0/mongobleed-detector/?ref=https://gottlabs.github.io/home/)
