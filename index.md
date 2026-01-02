@@ -85,7 +85,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-0012.png" alt="fortigate_cve">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-0012.png" alt="panos_cve">
   </div>
 </div>
 
