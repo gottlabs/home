@@ -11,6 +11,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/29/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+    <span class="cve-date">December 26, 2025</span>
     <span class="post-date">December 29, 2025</span>
     <p>MongoBleed, a discussion of forensics and considerations</p>
     <div class="post-tags">
@@ -27,6 +28,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/10/26/oracle_ebs_cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
+    <span class="cve-date">October 7, 2025</span>
     <span class="post-date">October 26, 2025</span>
     <p>The Zero-Day That Reminded Everyone Why ERP Means "Everyone's Really Pwned"</p>
     <div class="post-tags">
@@ -43,6 +45,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/05/30/sap_netweaver_cve2025-31324">SAP NetWeaver VC (CVE-2025-31324)</a></h4>
+    <span class="cve-date">April 26, 2025</span>
     <span class="post-date">May 30, 2025</span>
     <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland</p>
     <div class="post-tags">
@@ -59,6 +62,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/02/01/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
+    <span class="cve-date">January 14, 2025</span>
     <span class="post-date">February 2, 2025</span>
     <p>When authentication is just a really aggressive suggestion</p>
     <div class="post-tags">
@@ -74,8 +78,9 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 <div class="research-post">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2024/11/16/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
-    <span class="post-date">November 16, 2024</span>
+    <h4><a href="{{ site.baseurl }}/2026/01/01/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
+    <span class="cve-date">November 18, 2024</span>
+    <span class="post-date">January 1, 2026</span>
     <p>When Your Security Appliance Becomes the Vulnerability</p>
     <div class="post-tags">
       <span class="tag">CVE-2024-0012</span>
@@ -92,6 +97,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/01/02/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
+    <span class="cve-date">October 23, 2024</span>
     <span class="post-date">January 2, 2026</span>
     <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
     <div class="post-tags">
