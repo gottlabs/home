@@ -59,8 +59,8 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}2025/02/01/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
-    <span class="post-date">May 30, 2025</span>
-    <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland</p>
+    <span class="post-date">Feburary 2, 2025</span>
+    <p>When authentication is just a really aggressive suggestion</p>
     <div class="post-tags">
       <span class="tag">CVE-2024-55591</span>
       <span class="tag">fortigate</span>
