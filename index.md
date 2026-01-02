@@ -56,6 +56,22 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}2025/02/01/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
+    <span class="post-date">May 30, 2025</span>
+    <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland</p>
+    <div class="post-tags">
+      <span class="tag">CVE-2024-55591</span>
+      <span class="tag">fortigate</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="fortigate_cve">
+  </div>
+</div>
+
 ### Research Disclaimer
 <span class="disclaimer">
 Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance. Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
