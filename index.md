@@ -9,15 +9,28 @@ This site exists to publish research. Any resemblance to marketing is coincident
 
 ### Research/Write-ups
 
-<div class="research-post">
+<div class="filter-controls">
+  <span class="filter-label">Filter by tag:</span>
+  <span class="filter-tag" onclick="filterByTag('forensics')">forensics</span>
+  <span class="filter-tag" onclick="filterByTag('mongodb')">mongodb</span>
+  <span class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</span>
+  <span class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</span>
+  <span class="filter-tag" onclick="filterByTag('fortigate')">fortigate</span>
+  <span class="filter-tag" onclick="filterByTag('panos')">panos</span>
+  <span class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</span>
+  <button class="clear-filter" onclick="clearFilter()">Show All</button>
+</div>
+
+<div id="research-posts">
+<div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
     <span class="post-date">CVE Date: December 26, 2025</span>
     <p>MongoBleed, a discussion of forensics and considerations</p>
     <div class="post-tags">
-      <span class="tag">CVE-2025-14847</span>
-      <span class="tag">mongodb</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-14847</span>
+      <span class="tag" onclick="filterByTag('mongodb')">mongodb</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -25,15 +38,15 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="CVE-2025-61882,oracle_ebs,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/10/07/oracle_ebs_cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
     <span class="post-date">CVE Date: October 7, 2025</span>
     <p>The Zero-Day That Reminded Everyone Why ERP Means "Everyone's Really Pwned"</p>
     <div class="post-tags">
-      <span class="tag">CVE-2025-61882</span>
-      <span class="tag">oracle_ebs</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2025-61882')">CVE-2025-61882</span>
+      <span class="tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -41,15 +54,15 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="CVE-2025-31324,sap_netweaver,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/04/26/sap_netweaver_cve2025-31324">SAP NetWeaver VC (CVE-2025-31324)</a></h4>
     <span class="post-date">CVE Date: April 26, 2025</span>
     <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland</p>
     <div class="post-tags">
-      <span class="tag">CVE-2025-31324</span>
-      <span class="tag">sap_netweaver</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2025-31324')">CVE-2025-31324</span>
+      <span class="tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -57,15 +70,15 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="CVE-2024-55591,fortigate,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/01/14/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
     <span class="post-date">CVE Date: January 14, 2025</span>
     <p>When authentication is just a really aggressive suggestion</p>
     <div class="post-tags">
-      <span class="tag">CVE-2024-55591</span>
-      <span class="tag">fortigate</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2024-55591')">CVE-2024-55591</span>
+      <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -73,16 +86,16 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="CVE-2024-0012,CVE-2024-9474,panos,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/11/18/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
     <span class="post-date">CVE Date: November 18, 2024</span>
     <p>When Your Security Appliance Becomes the Vulnerability</p>
     <div class="post-tags">
-      <span class="tag">CVE-2024-0012</span>
-      <span class="tag">CVE-2024-9474</span>
-      <span class="tag">panos</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2024-0012')">CVE-2024-0012</span>
+      <span class="tag" onclick="filterByTag('CVE-2024-9474')">CVE-2024-9474</span>
+      <span class="tag" onclick="filterByTag('panos')">panos</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -90,15 +103,15 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="CVE-2024-47575,fortigate,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/10/23/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
     <span class="post-date">CVE Date: October 23, 2024</span>
     <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
     <div class="post-tags">
-      <span class="tag">CVE-2024-47575</span>
-      <span class="tag">fortigate</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('CVE-2024-47575')">CVE-2024-47575</span>
+      <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
@@ -106,21 +119,77 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post">
+<div class="research-post" data-tags="luna_moth,threat_groups,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/01/02/luna_moth">Luna Moth: When Social Engineering Beats Malware</a></h4>
     <span class="post-date">Post Date: January 02, 2026</span>
     <p>How ex-Conti operators are extorting millions without writing a single line of malicious code</p>
     <div class="post-tags">
-      <span class="tag">luna_moth</span>
-      <span class="tag">threat_groups</span>
-      <span class="tag">forensics</span>
+      <span class="tag" onclick="filterByTag('luna_moth')">luna_moth</span>
+      <span class="tag" onclick="filterByTag('threat_groups')">threat_groups</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/luna_moth.png" alt="fortijump">
+    <img src="{{ site.baseurl }}/assets/images/luna_moth.png" alt="luna_moth">
   </div>
 </div>
+</div>
+
+<script>
+let currentFilter = null;
+
+function filterByTag(tag) {
+  currentFilter = tag;
+  const posts = document.querySelectorAll('.research-post');
+  const filterTags = document.querySelectorAll('.filter-tag');
+  const postTags = document.querySelectorAll('.tag');
+  
+  // Update filter button states
+  filterTags.forEach(ft => {
+    if (ft.textContent === tag) {
+      ft.classList.add('active');
+    } else {
+      ft.classList.remove('active');
+    }
+  });
+  
+  // Update post tag states
+  postTags.forEach(pt => {
+    if (pt.textContent === tag) {
+      pt.classList.add('active');
+    } else {
+      pt.classList.remove('active');
+    }
+  });
+  
+  // Filter posts
+  posts.forEach(post => {
+    const tags = post.getAttribute('data-tags').toLowerCase();
+    if (tags.includes(tag.toLowerCase())) {
+      post.style.display = 'flex';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
+
+function clearFilter() {
+  currentFilter = null;
+  const posts = document.querySelectorAll('.research-post');
+  const filterTags = document.querySelectorAll('.filter-tag');
+  const postTags = document.querySelectorAll('.tag');
+  
+  // Clear all active states
+  filterTags.forEach(ft => ft.classList.remove('active'));
+  postTags.forEach(pt => pt.classList.remove('active'));
+  
+  // Show all posts
+  posts.forEach(post => {
+    post.style.display = 'flex';
+  });
+}
+</script>
 
 ### Research Disclaimer
 <span class="disclaimer">
