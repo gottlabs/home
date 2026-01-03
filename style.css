@@ -208,9 +208,9 @@ a:hover {
   background: #2d2d30;
   color: #d4d4d4;
   border: 1px solid #454545;
-  padding: 0.5rem 1rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 3px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
