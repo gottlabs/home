@@ -346,7 +346,7 @@ a:hover {
   padding: 0.4rem 1rem;
   background: #3c3c3c;
   color: #d4d4d4;
-  border: 1px solid #3c3c3c;
+  border: none;
   border-radius: 3px;
   font-size: 0.85rem;
   cursor: pointer;
