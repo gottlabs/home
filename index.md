@@ -10,15 +10,19 @@ This site exists to publish research. Any resemblance to marketing is coincident
 ### Research/Write-ups
 
 <div class="filter-controls">
-  <span class="filter-label">Filter by tag:</span>
-  <span class="filter-tag" onclick="filterByTag('forensics')">forensics</span>
-  <span class="filter-tag" onclick="filterByTag('mongodb')">mongodb</span>
-  <span class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</span>
-  <span class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</span>
-  <span class="filter-tag" onclick="filterByTag('fortigate')">fortigate</span>
-  <span class="filter-tag" onclick="filterByTag('panos')">panos</span>
-  <span class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</span>
-  <button class="clear-filter" onclick="clearFilter()">Show All</button>
+  <div class="filter-header">
+    <span class="filter-label">Filter by Research Area:</span>
+    <button class="clear-filter" onclick="clearFilter()">Reset View</button>
+  </div>
+  <div class="filter-grid">
+    <button class="filter-tag" onclick="filterByTag('forensics')">forensics</button>
+    <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
+    <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
+    <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
+    <button class="filter-tag" onclick="filterByTag('fortigate')">fortigate</button>
+    <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
+    <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
+  </div>
 </div>
 
 <div id="research-posts">
