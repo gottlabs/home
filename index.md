@@ -16,6 +16,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
   <div class="filter-grid">
     <button class="filter-tag" onclick="filterByTag('forensics')">forensics</button>
+    <button class="filter-tag" onclick="filterByTag('vulnerability')">vulnerability</button>
     <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
     <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
     <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
@@ -26,7 +27,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 </div>
 
 <div id="research-posts">
-<div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics">
+<div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
     <span class="post-date">CVE Date: December 26, 2025</span>
@@ -42,7 +43,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2025-61882,oracle_ebs,forensics">
+<div class="research-post" data-tags="CVE-2025-61882,oracle_ebs,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/10/07/oracle_ebs_cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
     <span class="post-date">CVE Date: October 7, 2025</span>
@@ -58,7 +59,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2025-31324,sap_netweaver,forensics">
+<div class="research-post" data-tags="CVE-2025-31324,sap_netweaver,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/04/26/sap_netweaver_cve2025-31324">SAP NetWeaver VC (CVE-2025-31324)</a></h4>
     <span class="post-date">CVE Date: April 26, 2025</span>
@@ -74,7 +75,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-55591,fortigate,forensics">
+<div class="research-post" data-tags="CVE-2024-55591,fortigate,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/01/14/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
     <span class="post-date">CVE Date: January 14, 2025</span>
@@ -90,7 +91,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-0012,CVE-2024-9474,panos,forensics">
+<div class="research-post" data-tags="CVE-2024-0012,CVE-2024-9474,panos,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/11/18/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
     <span class="post-date">CVE Date: November 18, 2024</span>
@@ -107,7 +108,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-47575,fortigate,forensics">
+<div class="research-post" data-tags="CVE-2024-47575,fortigate,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/10/23/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
     <span class="post-date">CVE Date: October 23, 2024</span>
