@@ -36,6 +36,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-14847</span>
       <span class="tag" onclick="filterByTag('mongodb')">mongodb</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
@@ -52,6 +53,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2025-61882')">CVE-2025-61882</span>
       <span class="tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
@@ -68,6 +70,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2025-31324')">CVE-2025-31324</span>
       <span class="tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
@@ -84,6 +87,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2024-55591')">CVE-2024-55591</span>
       <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
@@ -101,6 +105,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2024-9474')">CVE-2024-9474</span>
       <span class="tag" onclick="filterByTag('panos')">panos</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
@@ -117,6 +122,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
       <span class="tag" onclick="filterByTag('CVE-2024-47575')">CVE-2024-47575</span>
       <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
