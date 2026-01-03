@@ -106,6 +106,22 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
+<div class="research-post">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/02/luna_moth">Luna Moth: When Social Engineering Beats Malware</a></h4>
+    <span class="post-date">Post Date: January 02, 2026</span>
+    <p>How ex-Conti operators are extorting millions without writing a single line of malicious code</p>
+    <div class="post-tags">
+      <span class="tag">luna_moth</span>
+      <span class="tag">threat_groups</span>
+      <span class="tag">forensics</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/luna_moth.png" alt="fortijump">
+  </div>
+</div>
+
 ### Research Disclaimer
 <span class="disclaimer">
 Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance. Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
