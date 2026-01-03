@@ -1,4 +1,3 @@
-/* Navigation Bar */
 .top-nav {
   position: fixed;
   top: 0;
@@ -43,23 +42,17 @@
   fill: currentColor;
 }
 
-/* Adjust body padding to account for fixed navbar */
-body {
-  padding-top: 5rem;
-}
-
-/* Base Typography & Colors - Jupyter Dark Theme */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   background: #1e1e1e;
   color: #d4d4d4;
   margin: 0;
-  padding: 2rem 1.5rem;
+  padding: 5rem 1.5rem 2rem 1.5rem;
   line-height: 1.65;
   font-size: 15px;
+  counter-reset: code-counter;
 }
 
-/* Layout */
 main {
   max-width: 900px;
   margin: auto;
@@ -69,7 +62,6 @@ main {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Header Styling */
 header {
   border-bottom: 2px solid #3c3c3c;
   padding-bottom: 1.5rem;
@@ -144,7 +136,6 @@ h4 {
   margin-bottom: 0.8rem;
 }
 
-/* Paragraphs and Text */
 p {
   margin: 1rem 0;
   color: #d4d4d4;
@@ -159,7 +150,6 @@ em, i {
   color: #ce9178;
 }
 
-/* Lists */
 ul, ol {
   margin: 1rem 0;
   padding-left: 2rem;
@@ -170,7 +160,6 @@ li {
   color: #d4d4d4;
 }
 
-/* Links */
 a {
   color: #569cd6;
   text-decoration: none;
@@ -183,26 +172,101 @@ a:hover {
   border-bottom-color: #4ec9b0;
 }
 
-/* Research Post Display */
+.filter-controls {
+  margin-bottom: 2.5rem;
+  padding: 1.2rem;
+  background: #252526;
+  border: 1px solid #3c3c3c;
+  border-left: 4px solid #569cd6;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-label {
+  color: #858585;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.filter-tag {
+  background: #2d2d30;
+  color: #d4d4d4;
+  border: 1px solid #454545;
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.filter-tag:hover {
+  background: #3e3e42;
+  border-color: #569cd6;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.filter-tag.active {
+  background: #007acc;
+  border-color: #007acc;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(0, 122, 204, 0.4);
+}
+
+.clear-filter {
+  background: transparent;
+  color: #ce9178;
+  border: 1px solid #ce9178;
+  padding: 0.3rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-filter:hover {
+  background: rgba(206, 145, 120, 0.1);
+}
+
 .research-post {
   display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  gap: 0;
   margin: 2rem 0;
-  padding: 1.5rem;
   background: #2d2d30;
   border: 1px solid #3c3c3c;
+  border-left: 4px solid #569cd6;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .research-post:hover {
+  transform: translateX(5px);
   border-color: #569cd6;
-  box-shadow: 0 4px 12px rgba(86, 156, 214, 0.2);
 }
 
 .post-content {
   flex: 1;
+  padding: 1.5rem;
   min-width: 0;
 }
 
@@ -228,7 +292,6 @@ a:hover {
   font-size: 0.9rem;
 }
 
-/* Post Date */
 .post-date {
   display: block;
   font-size: 0.85rem;
@@ -237,25 +300,10 @@ a:hover {
   font-style: italic;
 }
 
-.cve-date {
-  display: inline-block;
-  font-size: 0.75rem;
-  color: #4ec9b0;
-  background: #1e1e1e;
-  padding: 0.2rem 0.6rem;
-  border-radius: 3px;
-  border: 1px solid #3c3c3c;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
 .post-image {
   flex-shrink: 0;
-  width: 300px;
-  height: 150px;
-  overflow: hidden;
-  border-radius: 4px;
-  border: 1px solid #3c3c3c;
+  width: 280px;
+  border-left: 1px solid #3c3c3c;
 }
 
 .post-image img {
@@ -269,7 +317,6 @@ a:hover {
   transform: scale(1.05);
 }
 
-/* Post Tags */
 .post-tags {
   display: flex;
   flex-wrap: wrap;
@@ -300,66 +347,6 @@ a:hover {
   border-color: #4ec9b0;
 }
 
-/* Tag Filter Controls */
-.filter-controls {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #252526;
-  border: 1px solid #3c3c3c;
-  border-radius: 6px;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filter-label {
-  color: #858585;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.filter-tag {
-  display: inline-block;
-  background: #2d2d30;
-  color: #4ec9b0;
-  padding: 0.4rem 0.8rem;
-  border-radius: 3px;
-  font-size: 0.85rem;
-  border: 1px solid #3c3c3c;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.filter-tag:hover {
-  background: #323233;
-  border-color: #569cd6;
-}
-
-.filter-tag.active {
-  background: #569cd6;
-  color: #ffffff;
-  border-color: #569cd6;
-}
-
-.clear-filter {
-  padding: 0.4rem 1rem;
-  background: #3c3c3c;
-  color: #d4d4d4;
-  border: none;
-  border-radius: 3px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: auto;
-}
-
-.clear-filter:hover {
-  background: #4c4c4c;
-  border-color: #569cd6;
-}
-
-/* Jupyter-Style Code Blocks */
 code {
   font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
   font-size: 0.9em;
@@ -390,7 +377,6 @@ pre code {
   line-height: 1.5;
 }
 
-/* Jupyter Input Cell Style */
 pre::before {
   content: "In [" counter(code-counter) "]:";
   counter-increment: code-counter;
@@ -403,11 +389,6 @@ pre::before {
   font-weight: 600;
 }
 
-body {
-  counter-reset: code-counter;
-}
-
-/* Markdown Cell Style (for non-code content) */
 .markdown-cell {
   background: #2d2d30;
   border: 1px solid #3c3c3c;
@@ -417,7 +398,6 @@ body {
   margin: 1.5rem 0;
 }
 
-/* Blockquotes - Jupyter Markdown Style */
 blockquote {
   background: #2d2d30;
   border-left: 4px solid #4ec9b0;
@@ -431,16 +411,15 @@ blockquote p {
   margin: 0.5rem 0;
 }
 
-/* Disclaimer Styling - Jupyter Warning Cell */
 .disclaimer {
   background: #2d2d30;
-  border: 1px solid #d4a760;
-  border-left: 4px solid #d4a760;
+  border: 1px solid #ce9178;
+  border-left: 4px solid #ce9178;
   border-radius: 4px;
   padding: 1rem 1.2rem;
   margin: 1.5rem 0;
   font-size: 0.95rem;
-  color: #d4a760;
+  color: #ce9178;
   display: block;
 }
 
@@ -450,14 +429,12 @@ blockquote p {
   margin-right: 0.5rem;
 }
 
-/* Muted Text */
 .muted {
   font-size: 0.9rem;
   color: #858585;
   font-style: italic;
 }
 
-/* Marginalia */
 .marginalia {
   background: #2d2d30;
   border: 1px solid #3c3c3c;
@@ -476,7 +453,6 @@ blockquote p {
   font-style: normal;
 }
 
-/* Footer */
 footer {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -486,12 +462,10 @@ footer {
   text-align: center;
 }
 
-/* Article Container */
 article {
   padding: 1rem 0;
 }
 
-/* Post Header Image */
 .post-header-image {
   width: 100%;
   max-width: 100%;
@@ -508,7 +482,6 @@ article {
   object-fit: cover;
 }
 
-/* Tables - Jupyter Style */
 table {
   border-collapse: collapse;
   width: 100%;
@@ -540,20 +513,17 @@ tr:hover {
   background: #323233;
 }
 
-/* Horizontal Rule */
 hr {
   border: none;
   border-top: 2px solid #3c3c3c;
   margin: 2.5rem 0;
 }
 
-/* Selection */
 ::selection {
   background: #264f78;
   color: #ffffff;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -572,7 +542,6 @@ hr {
   background: #4c4c4c;
 }
 
-/* Mobile Menu Toggle */
 .menu-toggle {
   display: none;
   background: none;
@@ -583,7 +552,6 @@ hr {
   padding: 0.5rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   body {
     padding: 1rem;
@@ -621,7 +589,6 @@ hr {
     height: 18px;
   }
   
-  /* Mobile Research Post Layout */
   .research-post {
     flex-direction: column;
   }
@@ -629,9 +596,10 @@ hr {
   .post-image {
     width: 100%;
     height: 200px;
+    border-left: none;
+    border-top: 1px solid #3c3c3c;
   }
   
-  /* Mobile Menu */
   .menu-toggle {
     display: block;
   }
@@ -640,9 +608,9 @@ hr {
     position: absolute;
     top: 100%;
     right: 0;
+    left: 0;
     background: rgba(30, 30, 30, 0.98);
-    border: 1px solid #3c3c3c;
-    border-top: none;
+    border-bottom: 1px solid #3c3c3c;
     flex-direction: column;
     padding: 1rem;
     display: none;
@@ -651,5 +619,17 @@ hr {
   
   .nav-right.active {
     display: flex;
+  }
+
+  .filter-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  
+  .clear-filter {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
   }
 }
