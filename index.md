@@ -154,7 +154,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     <p>When 32 Null Bytes Break Authentication and SIEM Logs Miss Everything That Matters</p>
     <div class="post-tags">
       <span class="tag" onclick="filterByTag('CVE-2024-53704')">CVE-2024-53704</span>
-      <span class="tag" onclick="filterByTag('sonicwall')">sonicwall</span>
+      <span class="tag" onclick="filterByTag('threat_groups')">sonicwall</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
       <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
@@ -162,6 +162,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
   <div class="post-image">
     <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="sonicwall">
   </div>
+</div>
 </div>
 
 <script>
