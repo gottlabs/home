@@ -147,6 +147,23 @@ This site exists to publish research. Any resemblance to marketing is coincident
 </div>
 </div>
 
+<div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2024/11/05/sonicwall_cve2024-53704">CVE-2024-53704: SonicWall Session Hijack</a></h4>
+    <span class="post-date">CVE Date: November 05, 2024</span>
+    <p>When 32 Null Bytes Break Authentication and SIEM Logs Miss Everything That Matters</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2024-53704')">CVE-2024-53704</span>
+      <span class="tag" onclick="filterByTag('sonicwall')">sonicwall</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
+  </div>
+</div>
+
 <script>
 let currentFilter = null;
 
