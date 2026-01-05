@@ -163,7 +163,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
     <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="sonicwall">
   </div>
 </div>
-</div>
 
 <script>
 let currentFilter = null;
