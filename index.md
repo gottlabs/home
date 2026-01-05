@@ -160,7 +160,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="sonicwall">
   </div>
 </div>
 
