@@ -164,6 +164,8 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
+</div>
+
 <script>
 let currentFilter = null;
 
