@@ -63,7 +63,7 @@ function clearFilter() {
     <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
     <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
     <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
-    <button class="filter-tag" onclick="filterByTag('fortigate')">fortigate</button>
+    <button class="filter-tag" onclick="filterByTag('fortinet')">fortinet</button>
     <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
     <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
     <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
@@ -71,6 +71,23 @@ function clearFilter() {
 </div>
 
 <div id="research-posts">
+
+<div class="research-post" data-tags="CVE-2025-14847,fortinet,forensics,vulnerability">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/06/forti_cve2025-59718">Trust But Don't Verify (Forti CVE-2025-59718)</a></h4>
+    <span class="post-date">CVE Date: November 09, 2025</span>
+    <p>CVE-2025-59718 & CVE-2025-59719 - Who Needs Signature Verification Anyway?</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-59718</span>
+      <span class="tag" onclick="filterByTag('fortinet')">fortinet</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-59718.png" alt="forti_cve2">
+  </div>
+</div>
   
 <div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
   <div class="post-content">
@@ -123,20 +140,20 @@ function clearFilter() {
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-55591,fortigate,forensics,vulnerability">
+<div class="research-post" data-tags="CVE-2024-55591,fortinet,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/01/14/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
     <span class="post-date">CVE Date: January 14, 2025</span>
     <p>When authentication is just a really aggressive suggestion</p>
     <div class="post-tags">
       <span class="tag" onclick="filterByTag('CVE-2024-55591')">CVE-2024-55591</span>
-      <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
+      <span class="tag" onclick="filterByTag('fortinet')">fortinet</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
       <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="fortigate_cve">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="forti_cve1">
   </div>
 </div>
 
@@ -158,14 +175,14 @@ function clearFilter() {
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-47575,fortigate,forensics,vulnerability">
+<div class="research-post" data-tags="CVE-2024-47575,fortinet,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2024/10/23/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
     <span class="post-date">CVE Date: October 23, 2024</span>
     <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
     <div class="post-tags">
       <span class="tag" onclick="filterByTag('CVE-2024-47575')">CVE-2024-47575</span>
-      <span class="tag" onclick="filterByTag('fortigate')">fortigate</span>
+      <span class="tag" onclick="filterByTag('fortinet')">fortinet</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
       <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
