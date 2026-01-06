@@ -168,35 +168,29 @@ This site exists to publish research. Any resemblance to marketing is coincident
 <div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
 </div>
 
+---
 <script>
 let currentFilter = null;
-
 function filterByTag(tag) {
   currentFilter = tag;
   const posts = document.querySelectorAll('.research-post');
   const filterTags = document.querySelectorAll('.filter-tag');
   const postTags = document.querySelectorAll('.tag');
-  
-  // Update filter button states
-  filterTags.forEach(ft => {
+    filterTags.forEach(ft => {
     if (ft.textContent === tag) {
       ft.classList.add('active');
     } else {
       ft.classList.remove('active');
     }
   });
-  
-  // Update post tag states
-  postTags.forEach(pt => {
+    postTags.forEach(pt => {
     if (pt.textContent === tag) {
       pt.classList.add('active');
     } else {
       pt.classList.remove('active');
     }
   });
-  
-  // Filter posts
-  posts.forEach(post => {
+    posts.forEach(post => {
     const tags = post.getAttribute('data-tags').toLowerCase();
     if (tags.includes(tag.toLowerCase())) {
       post.style.display = 'flex';
@@ -205,18 +199,13 @@ function filterByTag(tag) {
     }
   });
 }
-
 function clearFilter() {
   currentFilter = null;
   const posts = document.querySelectorAll('.research-post');
   const filterTags = document.querySelectorAll('.filter-tag');
   const postTags = document.querySelectorAll('.tag');
-  
-  // Clear all active states
   filterTags.forEach(ft => ft.classList.remove('active'));
   postTags.forEach(pt => pt.classList.remove('active'));
-  
-  // Show all posts
   posts.forEach(post => {
     post.style.display = 'flex';
   });
