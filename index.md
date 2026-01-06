@@ -51,6 +51,7 @@ function clearFilter() {
 </script>
 
 ### Research/Write-ups
+<div
 
 <div class="filter-controls">
   <div class="filter-header">
@@ -208,7 +209,6 @@ function clearFilter() {
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
 </div>
 
 ### Research Disclaimer
