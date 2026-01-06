@@ -28,6 +28,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
 </div>
 
 <div id="research-posts">
+  
 <div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
@@ -162,7 +163,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
   <div class="post-image">
     <img src="{{ site.baseurl }}/assets/images/CVE-2024-53704.png" alt="sonicwall">
   </div>
-</div>
 </div>
 
 <script>
