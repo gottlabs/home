@@ -147,7 +147,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
   </div>
 </div>
 
-<div id="research-posts">
 <div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/01/05/sonicwall_cve2024-53704">CVE-2024-53704: SonicWall Session Hijack</a></h4>
