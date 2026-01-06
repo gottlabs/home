@@ -146,7 +146,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
     <img src="{{ site.baseurl }}/assets/images/luna_moth.png" alt="luna_moth">
   </div>
 </div>
-</div>
 
 <div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
   <div class="post-content">
