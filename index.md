@@ -7,6 +7,50 @@ title: Home
 
 This site exists to publish research. Any resemblance to marketing is coincidental.
 
+<script>
+let currentFilter = null;
+function filterByTag(tag) {
+  currentFilter = tag;
+  const posts = document.querySelectorAll('.research-post');
+  const filterTags = document.querySelectorAll('.filter-tag');
+  const postTags = document.querySelectorAll('.tag');
+    filterTags.forEach(ft => {
+    if (ft.textContent === tag) {
+      ft.classList.add('active');
+    } else {
+      ft.classList.remove('active');
+    }
+  });
+    postTags.forEach(pt => {
+    if (pt.textContent === tag) {
+      pt.classList.add('active');
+    } else {
+      pt.classList.remove('active');
+    }
+  });
+    posts.forEach(post => {
+    const tags = post.getAttribute('data-tags').toLowerCase();
+    if (tags.includes(tag.toLowerCase())) {
+      post.style.display = 'flex';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
+function clearFilter() {
+  currentFilter = null;
+  const posts = document.querySelectorAll('.research-post');
+  const filterTags = document.querySelectorAll('.filter-tag');
+  const postTags = document.querySelectorAll('.tag');
+  filterTags.forEach(ft => ft.classList.remove('active'));
+  postTags.forEach(pt => pt.classList.remove('active'));
+  posts.forEach(post => {
+    post.style.display = 'flex';
+  });
+}
+</script>
+
+
 ### Research/Write-ups
 
 <div class="filter-controls">
@@ -169,48 +213,6 @@ This site exists to publish research. Any resemblance to marketing is coincident
 </div>
 
 ---
-<script>
-let currentFilter = null;
-function filterByTag(tag) {
-  currentFilter = tag;
-  const posts = document.querySelectorAll('.research-post');
-  const filterTags = document.querySelectorAll('.filter-tag');
-  const postTags = document.querySelectorAll('.tag');
-    filterTags.forEach(ft => {
-    if (ft.textContent === tag) {
-      ft.classList.add('active');
-    } else {
-      ft.classList.remove('active');
-    }
-  });
-    postTags.forEach(pt => {
-    if (pt.textContent === tag) {
-      pt.classList.add('active');
-    } else {
-      pt.classList.remove('active');
-    }
-  });
-    posts.forEach(post => {
-    const tags = post.getAttribute('data-tags').toLowerCase();
-    if (tags.includes(tag.toLowerCase())) {
-      post.style.display = 'flex';
-    } else {
-      post.style.display = 'none';
-    }
-  });
-}
-function clearFilter() {
-  currentFilter = null;
-  const posts = document.querySelectorAll('.research-post');
-  const filterTags = document.querySelectorAll('.filter-tag');
-  const postTags = document.querySelectorAll('.tag');
-  filterTags.forEach(ft => ft.classList.remove('active'));
-  postTags.forEach(pt => pt.classList.remove('active'));
-  posts.forEach(post => {
-    post.style.display = 'flex';
-  });
-}
-</script>
 
 ### Research Disclaimer
 <span class="disclaimer">
