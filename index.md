@@ -51,7 +51,6 @@ function clearFilter() {
 </script>
 
 ### Research/Write-ups
-<div
 
 <div class="filter-controls">
   <div class="filter-header">
