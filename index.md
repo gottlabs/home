@@ -22,6 +22,7 @@ This site exists to publish research. Any resemblance to marketing is coincident
     <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
     <button class="filter-tag" onclick="filterByTag('fortigate')">fortigate</button>
     <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
+    <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
     <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
   </div>
 </div>
