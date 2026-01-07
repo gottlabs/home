@@ -303,9 +303,160 @@ This reduces exploitation speed but improves stealth. Detection based solely on 
 
 The uncomfortable truth: **detection identifies exploitation attempts with the public PoC, not all exploitation, and definitely not data exfiltration success**.
 
-### Remediation and Workarounds
+## Forensic Evidence Collection
 
-Eliminate the exposure of the MongoDB service
+When exploitation is suspected or confirmed, evidence collection needs to happen fast. MongoDB logs rotate, memory is volatile, and attackers who gained credentials will use them. The following methods preserve forensic artifacts before they disappear.
+
+### Collection Priority Order
+
+Time matters. The forensic window closes fast. If you can't collect everything immediately:
+
+1. **MongoDB logs** - Rotate fastest, highest value for detection
+2. **Memory dump** - Most volatile, shows current heap state
+3. **System authentication logs** - Shows credential reuse patterns
+4. **Disk snapshot** - Time-consuming but comprehensive preservation
+5. **Network flow logs** - May show data exfiltration volume
+6. **Configuration files** - Static, can be collected last
+
+Logs rotate. Memory changes. Attackers clean up. Collect what matters first.
+
+### Memory Acquisition
+
+Memory contains the current heap state, active connections, cached credentials, and in-memory data structures that don't exist on disk. For MongoBleed investigations, memory is critical because it may contain:
+
+- Heap regions that were disclosed during exploitation
+- Active MongoDB WiredTiger cache content
+- Credentials in memory that haven't been written to logs
+- Network connection state and buffers
+- Process memory maps showing what was allocated when
+
+**Linux Memory Acquisition:**
+
+Using `avml` (Azure VM Memory Dump):
+```bash
+# Fast, minimal impact, generates lime-compatible format
+wget https://github.com/microsoft/avml/releases/download/v0.14.0/avml
+chmod +x avml
+sudo ./avml memory.lime
+```
+
+**Container Memory Acquisition:**
+
+If MongoDB is running in containers, memory extraction is different:
+
+```bash
+# Docker container memory dump
+docker pause mongodb_container
+docker checkpoint create mongodb_container checkpoint1
+# Extract from /var/lib/docker/containers/<container_id>/checkpoints/checkpoint1/
+docker unpause mongodb_container
+
+# Or manual extraction via gcore
+docker exec -it mongodb_container bash
+MONGOD_PID=$(pgrep mongod)
+gcore -o /tmp/mongod-dump $MONGOD_PID
+# Copy out before container restart
+docker cp mongodb_container:/tmp/mongod-dump.${MONGOD_PID} ./
+```
+
+### Disk Imaging
+
+Disk images preserve MongoDB data files, logs, configuration, and system artifacts. For MongoBleed, disk imaging captures:
+
+- MongoDB data directory (`/var/lib/mongodb/` or `/data/db/`)
+- Complete log history before rotation
+- WiredTiger storage files and journals
+- Configuration files showing compression settings
+- System logs with authentication and network events
+
+**Live Imaging (Minimal Downtime):**
+
+Using `dc3dd` for forensically sound imaging:
+```bash
+# Image the MongoDB data volume while live
+sudo dc3dd if=/dev/sda1 of=/forensics/mongodb-disk.img hash=sha256 log=/forensics/imaging.log
+
+# Or for faster imaging with progress
+sudo dcfldd if=/dev/sda1 of=/forensics/mongodb-disk.img hash=sha256 hashwindow=1G statusinterval=1024
+```
+
+Using `dd` with progress monitoring:
+```bash
+# Standard dd with status
+sudo dd if=/dev/sda1 of=/forensics/mongodb-disk.img bs=64K conv=noerror,sync status=progress
+
+# Pipe through pv for better progress indication
+sudo dd if=/dev/sda1 bs=64K conv=noerror,sync | pv -s $(blockdev --getsize64 /dev/sda1) | dd of=/forensics/mongodb-disk.img bs=64K
+```
+
+**VM Snapshot (Cloud/Virtualized Environments):**
+
+Cloud platforms provide snapshot capabilities that are faster than disk imaging:
+
+```bash
+# AWS EBS snapshot
+aws ec2 create-snapshot --volume-id vol-1234567890abcdef0 --description "MongoBleed forensics"
+
+# Azure disk snapshot
+az snapshot create --resource-group myRG --name mongodb-forensic-snap --source /subscriptions/.../disks/mongodb-disk
+
+# GCP persistent disk snapshot
+gcloud compute disks snapshot mongodb-disk --snapshot-names=mongodb-forensic-snap --zone=us-central1-a
+
+# VMware vSphere snapshot
+vim-cmd vmsvc/snapshot.create <vmid> "MongoBleed Forensic Snapshot" "Pre-remediation state" 0 0
+```
+
+Snapshots are fast (seconds to minutes) but consume storage in the cloud platform. Create the snapshot, then copy the data out for offline analysis.
+
+**Container Volume Extraction:**
+
+For containerized MongoDB deployments:
+
+```bash
+# Docker volume backup
+docker run --rm --volumes-from mongodb_container -v $(pwd):/backup ubuntu tar cvf /backup/mongodb-volume.tar /data/db
+
+# Kubernetes persistent volume claim
+kubectl get pvc mongodb-data-pvc -o yaml > pvc-config.yaml
+kubectl exec -it mongodb-pod -- tar czf - /data/db > mongodb-volume.tar.gz
+
+# Copy entire volume for offline analysis
+docker cp mongodb_container:/data/db ./mongodb-data-forensic/
+```
+
+**Log file collections:**
+
+### Configuration Files
+
+Configuration reveals what was enabled during the exploitation window.
+
+**Critical configs:**
+- `/etc/mongod.conf` - MongoDB configuration (compression settings, logging verbosity, authentication)
+- `/var/lib/mongodb/.keyfile` - replica set keyfile if present
+- `/etc/sysctl.conf` - system tuning that might affect MongoDB
+
+**MongoDB-specific logs:**
+- `/var/log/mongodb/mongod.log*` (all rotated logs)
+- Journald entries for `mongod` service (if using systemd)
+- MongoDB audit logs (Enterprise Edition only)
+
+**System logs:**
+- `/var/log/auth.log` (Debian/Ubuntu) or `/var/log/secure` (RHEL/CentOS) - authentication attempts
+- `/var/log/syslog` or `/var/log/messages` - system events
+- `/var/log/audit/audit.log*` - auditd logs if enabled
+- Journald entries (`journalctl` output for relevant timeframes)
+
+**Network logs:**
+- Firewall logs (`/var/log/ufw.log`, `/var/log/firewalld`)
+- NetFlow data for port 27017 traffic
+- Packet captures (if available) showing MongoDB connections
+
+**Application logs:**
+- Web server logs (`/var/log/apache2/`, `/var/log/nginx/`)
+- Application-specific logs that connect to MongoDB
+- Container logs (Docker logs, Kubernetes pod logs)
+
 ## Patching
 
 Apply the fixed versions:
