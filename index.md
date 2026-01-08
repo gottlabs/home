@@ -60,13 +60,13 @@ function clearFilter() {
   <div class="filter-grid">
     <button class="filter-tag" onclick="filterByTag('forensics')">forensics</button>
     <button class="filter-tag" onclick="filterByTag('vulnerability')">vulnerability</button>
+    <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
     <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
     <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
     <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
     <button class="filter-tag" onclick="filterByTag('fortinet')">fortinet</button>
     <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
     <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
-    <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
   </div>
 </div>
 
