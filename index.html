@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home · GOTT Labs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Independent cybersecurity research focused on threat techniques and defensive reality.">
+  <link rel="stylesheet" href="{{ site.baseurl }}/style.css">
+  <link rel="icon" type="image/png" href="{{ site.baseurl }}/assets/favicon.png">
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="{{ site.baseurl }}/" class="nav-icon" title="Home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </a>
+      <a href="https://start.me/p/wMrA5z/cyber-threat-intelligence" class="nav-icon" title="RSS Feed Reader">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6h6V2"></path><path d="M6.5 8a8.5 8.5 0 1 0 11 0"></path><circle cx="12" cy="16" r="1"></circle></svg>
+      </a>
+    </div>
+    <a href="https://github.com/gottlabs/home" class="nav-icon" title="View Source Code" target="_blank" rel="noopener noreferrer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"></polyline>
+        <polyline points="8 6 2 12 8 18"></polyline>
+      </svg>
+    </a>
+    <button class="menu-toggle" aria-label="Toggle Menu" onclick="toggleMenu()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+
+    <div class="nav-right" id="navRight">
+      <a href="{{ site.baseurl }}/feed.xml" class="nav-icon" title="RSS Feed">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+      </a>
+      <a href="https://x.com/_danielgott" class="nav-icon" title="X (Twitter)" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://www.linkedin.com/in/daniel-j-gott/" class="nav-icon" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
+      </a>
+      <a href="https://github.com/danielgottt" class="nav-icon" title="GitHub Profile" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <header>
+      <h1><a href="{{ site.baseurl }}/">GOTT Labs</a></h1>
+    </header>
+    
+    <p><strong>GOTT Labs</strong> is an independent cybersecurity research project focused on studying how threats operate in practice, how defensive systems respond under real conditions, and where theory quietly diverges from reality.</p>
+
+    <p>This site exists to publish research. Any resemblance to marketing is coincidental.</p>
+
+    <h3>Research/Write-ups</h3>
+
+    <div class="filter-controls">
+      <div class="filter-header">
+        <span class="filter-label">Filter by Research Area:</span>
+        <button class="clear-filter" onclick="clearFilter()">Reset View</button>
+      </div>
+      <div class="filter-grid">
+        <button class="filter-tag" onclick="filterByTag('forensics')">forensics</button>
+        <button class="filter-tag" onclick="filterByTag('vulnerability')">vulnerability</button>
+        <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
+        <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
+        <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
+        <button class="filter-tag" onclick="filterByTag('fortinet')">fortinet</button>
+        <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
+        <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
+        <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
+      </div>
+    </div>
+
+    <div id="research-posts">
+
+      <div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+          <span class="post-date">CVE Date: December 26, 2025</span>
+          <p>MongoBleed, a discussion of forensics and considerations</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-14847</span>
+            <span class="tag" onclick="filterByTag('mongodb')">mongodb</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2025-14847.png" alt="MongoBleed">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2025-61882,oracle_ebs,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2025/10/07/oracle_ebs_cve2025-61882">Oracle EBS (CVE-2025-61882)</a></h4>
+          <span class="post-date">CVE Date: October 7, 2025</span>
+          <p>The Zero-Day That Reminded Everyone Why ERP Means "Everyone's Really Pwned"</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2025-61882')">CVE-2025-61882</span>
+            <span class="tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2025-61882.png" alt="oracle_ebs">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2025-31324,sap_netweaver,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2025/04/26/sap_netweaver_cve2025-31324">SAP NetWeaver VC (CVE-2025-31324)</a></h4>
+          <span class="post-date">CVE Date: April 26, 2025</span>
+          <p>How an obscure endpoint turned SAP NetWeaver into a webshell wonderland</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2025-31324')">CVE-2025-31324</span>
+            <span class="tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2025-31324.png" alt="sap_netweaver">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2024-55591,fortinet,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2025/01/14/fortigate_cve2024-55591">The FortiGate Backdoor That Wasn't A Backdoor (CVE-2024-55591)</a></h4>
+          <span class="post-date">CVE Date: January 14, 2025</span>
+          <p>When authentication is just a really aggressive suggestion</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2024-55591')">CVE-2024-55591</span>
+            <span class="tag" onclick="filterByTag('fortinet')">fortinet</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2024-55591.png" alt="forti_cve1">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2024-0012,CVE-2024-9474,panos,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2024/11/18/panos_cve2024-0012">PAN-OS (CVE-2024-0012 and CVE-2024-9474)</a></h4>
+          <span class="post-date">CVE Date: November 18, 2024</span>
+          <p>When Your Security Appliance Becomes the Vulnerability</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2024-0012')">CVE-2024-0012</span>
+            <span class="tag" onclick="filterByTag('CVE-2024-9474')">CVE-2024-9474</span>
+            <span class="tag" onclick="filterByTag('panos')">panos</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2024-0012.png" alt="panos_cve">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2024-47575,fortinet,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2024/10/23/fortijump_cve2024-47575">FortiJump Diving board (CVE-2024-47575)</a></h4>
+          <span class="post-date">CVE Date: October 23, 2024</span>
+          <p>How Missing Auth in FortiManager Let UNC5820 Play Musical Chairs with Enterprise Networks</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2024-47575')">CVE-2024-47575</span>
+            <span class="tag" onclick="filterByTag('fortinet')">fortinet</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2024-47575.png" alt="fortijump">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="luna_moth,threat_groups,forensics">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2026/01/02/luna_moth">Luna Moth: When Social Engineering Beats Malware</a></h4>
+          <span class="post-date">Post Date: January 02, 2026</span>
+          <p>How ex-Conti operators are extorting millions without writing a single line of malicious code</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('luna_moth')">luna_moth</span>
+            <span class="tag" onclick="filterByTag('threat_groups')">threat_groups</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/luna_moth.png" alt="luna_moth">
+        </div>
+      </div>
+
+      <div class="research-post" data-tags="CVE-2024-53704,sonicwall,forensics,vulnerability">
+        <div class="post-content">
+          <h4><a href="{{ site.baseurl }}/2026/01/05/sonicwall_cve2024-53704">CVE-2024-53704: SonicWall Session Hijack</a></h4>
+          <span class="post-date">CVE Date: November 05, 2024</span>
+          <p>When 32 Null Bytes Break Authentication and SIEM Logs Miss Everything That Matters</p>
+          <div class="post-tags">
+            <span class="tag" onclick="filterByTag('CVE-2024-53704')">CVE-2024-53704</span>
+            <span class="tag" onclick="filterByTag('sonicwall')">sonicwall</span>
+            <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+            <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+          </div>
+        </div>
+        <div class="post-image">
+          <img src="{{ site.baseurl }}/assets/images/CVE-2024-53704.png" alt="sonicwall">
+        </div>
+      </div>
+
+    </div>
+
+    <h3>Research Disclaimer</h3>
+    <span class="disclaimer">
+      Research published is provided for educational purposes. Findings reflect observed behavior in specific environments and should not be interpreted as universal truth, vendor endorsement, or operational guidance. Techniques discussed may be incomplete, ineffective, or rendered obsolete without notice. Readers are expected to apply judgment, skepticism, and basic security hygiene.
+    </span>
+
+    <footer>
+      <p>GOTT Labs · Independent Research · Assertions backed by evidence, not optimism</p>
+    </footer>
+  </main>
+
+  <script>
+    let currentFilter = null;
+
+    function filterByTag(tag) {
+      currentFilter = tag;
+      const posts = document.querySelectorAll('.research-post');
+      const filterTags = document.querySelectorAll('.filter-tag');
+      const postTags = document.querySelectorAll('.tag');
+      
+      filterTags.forEach(ft => {
+        if (ft.textContent === tag) {
+          ft.classList.add('active');
+        } else {
+          ft.classList.remove('active');
+        }
+      });
+      
+      postTags.forEach(pt => {
+        if (pt.textContent === tag) {
+          pt.classList.add('active');
+        } else {
+          pt.classList.remove('active');
+        }
+      });
+      
+      posts.forEach(post => {
+        const tags = post.getAttribute('data-tags').toLowerCase();
+        if (tags.includes(tag.toLowerCase())) {
+          post.style.display = 'flex';
+        } else {
+          post.style.display = 'none';
+        }
+      });
+    }
+
+    function clearFilter() {
+      currentFilter = null;
+      const posts = document.querySelectorAll('.research-post');
+      const filterTags = document.querySelectorAll('.filter-tag');
+      const postTags = document.querySelectorAll('.tag');
+      
+      filterTags.forEach(ft => ft.classList.remove('active'));
+      postTags.forEach(pt => pt.classList.remove('active'));
+      posts.forEach(post => {
+        post.style.display = 'flex';
+      });
+    }
+
+    function toggleMenu() {
+      const nav = document.getElementById('navRight');
+      nav.classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(event) {
+      const nav = document.getElementById('navRight');
+      const toggle = document.querySelector('.menu-toggle');
+      if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+        nav.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
