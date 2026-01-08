@@ -72,6 +72,23 @@ function clearFilter() {
 
 <div id="research-posts">
 
+<div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
+    <span class="post-date">CVE Date: December 26, 2025</span>
+    <p>MongoBleed, a discussion of forensics and considerations</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-14847</span>
+      <span class="tag" onclick="filterByTag('mongodb')">mongodb</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-14847.png" alt="MongoBleed">
+  </div>
+</div>
+
 <div class="research-post" data-tags="CVE-2025-59718,fortinet,forensics,vulnerability">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/01/06/forti_cve2025-59718">Trust But Don't Verify (Forti CVE-2025-59718)</a></h4>
@@ -89,20 +106,19 @@ function clearFilter() {
   </div>
 </div>
 
-<div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
+<div class="research-post" data-tags="CVE-2025-59287,WSUS,forensics,vulnerability">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2025/12/26/mongobleed_forensics_cve2025-14847">MongoBleed Forensics (CVE-2025-14847)</a></h4>
-    <span class="post-date">CVE Date: December 26, 2025</span>
-    <p>MongoBleed, a discussion of forensics and considerations</p>
+    <h4><a href="{{ site.baseurl }}/2026/01/07/wsus_cve2025-59287">CVE-2025-59287 and the WSUS Deserialization Nightmare</a></h4>
+    <span class="post-date">CVE Date: October 10, 2025</span>
+    <p>A critical unauthenticated RCE vulnerability that turned Microsoft's patch delivery system into an attacker's dream"</p>
     <div class="post-tags">
-      <span class="tag" onclick="filterByTag('CVE-2025-14847')">CVE-2025-14847</span>
-      <span class="tag" onclick="filterByTag('mongodb')">mongodb</span>
+      <span class="tag" onclick="filterByTag('CVE-2025-61882')">CVE-2025-59287</span>
       <span class="tag" onclick="filterByTag('forensics')">forensics</span>
       <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/CVE-2025-14847.png" alt="MongoBleed">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2025-59287.png" alt="wsus">
   </div>
 </div>
 
