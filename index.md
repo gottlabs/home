@@ -61,6 +61,7 @@ function clearFilter() {
     <button class="filter-tag" onclick="filterByTag('forensics')">forensics</button>
     <button class="filter-tag" onclick="filterByTag('vulnerability')">vulnerability</button>
     <button class="filter-tag" onclick="filterByTag('threat_groups')">threat_groups</button>
+    <button class="filter-tag" onclick="filterByTag('research')">research</button>
     <button class="filter-tag" onclick="filterByTag('mongodb')">mongodb</button>
     <button class="filter-tag" onclick="filterByTag('oracle_ebs')">oracle_ebs</button>
     <button class="filter-tag" onclick="filterByTag('sap_netweaver')">sap_netweaver</button>
@@ -71,6 +72,21 @@ function clearFilter() {
 </div>
 
 <div id="research-posts">
+
+<div class="research-post" data-tags="research,threat_groups">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/01/10/tds_part1">Internet Traffic Brokers: TDS and the VexTrio Criminal Enterprise</a></h4>
+    <span class="post-date">Published: January 10, 2026</span>
+    <p>How a Billion-Dollar Cybercrime Operation Hides Behind Legitimate AdTech (Part 1)</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('research')">research</span>
+      <span class="tag" onclick="filterByTag('threat_groups')">threat_groups</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/vextrio_tds_part1.png" alt="vextrio_tds_part1">
+  </div>
+</div>
 
 <div class="research-post" data-tags="CVE-2025-14847,mongodb,forensics,vulnerability">
   <div class="post-content">
