@@ -75,6 +75,23 @@ function clearFilter() {
 
 <div class="research-post" data-tags="research,threat_groups">
   <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/02/15/ivanti_epmm_cve-2026-1281">CVE-2026-1281: The Art of Arithmetic Expansion</a></h4>
+    <span class="post-date">Published: Februrary 15, 2026</span>
+    <p>Forensic analysis of pre-auth RCE exploitation in Ivanti EPMM through esoteric shell evaluation mechanics</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2026-1281')">CVE-2026-1281</span>
+      <span class="tag" onclick="filterByTag('ivanti')">ivanti</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/vextrio_tds_part1.png" alt="vextrio_tds_part1">
+  </div>
+</div>
+
+<div class="research-post" data-tags="research,threat_groups">
+  <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/01/10/tds_part1">Internet Traffic Brokers: TDS and the VexTrio Criminal Enterprise</a></h4>
     <span class="post-date">Published: January 10, 2026</span>
     <p>How a Billion-Dollar Cybercrime Operation Hides Behind Legitimate AdTech (Part 1)</p>
