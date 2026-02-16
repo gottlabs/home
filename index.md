@@ -68,6 +68,7 @@ function clearFilter() {
     <button class="filter-tag" onclick="filterByTag('fortinet')">fortinet</button>
     <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
     <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
+    <button class="filter-tag" onclick="filterByTag('ivanti')">ivanti</button>
   </div>
 </div>
 
