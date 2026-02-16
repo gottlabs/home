@@ -86,7 +86,7 @@ function clearFilter() {
     </div>
   </div>
   <div class="post-image">
-    <img src="{{ site.baseurl }}/assets/images/vextrio_tds_part1.png" alt="vextrio_tds_part1">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2026-1281.png" alt="CVE-2025-1281">
   </div>
 </div>
 
