@@ -74,7 +74,23 @@ function clearFilter() {
 
 <div id="research-posts">
 
-<div class="research-post" data-tags="research,ivanti, vulnerability, forensics">
+<div class="research-post" data-tags="research,vulnerability,forensics">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/02/17/dell_cve2026-22769">Dell RecoverPoint for VMs (CVE-2026-22769)</a></h4>
+    <span class="post-date">Published: Februrary 17, 2026</span>
+    <p>When your backup appliance is also a pre-installed APT welcome mat</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2026-22769')">CVE-2026-22769</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2026-22769.png" alt="CVE-2026-22769">
+  </div>
+</div>
+
+<div class="research-post" data-tags="research,ivanti,vulnerability,forensics">
   <div class="post-content">
     <h4><a href="{{ site.baseurl }}/2026/02/15/ivanti_epmm_cve-2026-1281">CVE-2026-1281: The Art of Arithmetic Expansion</a></h4>
     <span class="post-date">Published: Februrary 15, 2026</span>
