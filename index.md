@@ -69,10 +69,28 @@ function clearFilter() {
     <button class="filter-tag" onclick="filterByTag('panos')">panos</button>
     <button class="filter-tag" onclick="filterByTag('sonicwall')">sonicwall</button>
     <button class="filter-tag" onclick="filterByTag('ivanti')">ivanti</button>
+    <button class="filter-tag" onclick="filterByTag('cisco')">cisco</button>
   </div>
 </div>
 
 <div id="research-posts">
+
+<div class="research-post" data-tags="cisco,vulnerability,forensics">
+  <div class="post-content">
+    <h4><a href="{{ site.baseurl }}/2026/02/25/cisco_cve2026-20127">CVE-2026-20127: Cisco Catalyst SD-WAN Authentication Bypass</a></h4>
+    <span class="post-date">Published: Februrary 25, 2026</span>
+    <p>Three years of silent access, one busted peering handshake, and a control plane that belonged to someone else</p>
+    <div class="post-tags">
+      <span class="tag" onclick="filterByTag('CVE-2026-20127')">CVE-2026-20127</span>
+      <span class="tag" onclick="filterByTag('cisco')">cisco</span>
+      <span class="tag" onclick="filterByTag('forensics')">forensics</span>
+      <span class="tag" onclick="filterByTag('vulnerability')">vulnerability</span>
+    </div>
+  </div>
+  <div class="post-image">
+    <img src="{{ site.baseurl }}/assets/images/CVE-2026-20127.png" alt="CVE-2026-20127">
+  </div>
+</div>
 
 <div class="research-post" data-tags="research,vulnerability,forensics">
   <div class="post-content">
