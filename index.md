@@ -78,7 +78,7 @@ function clearFilter() {
 
 <div class="research-post" data-tags="citrix,vulnerability,forensics">
   <div class="post-content">
-    <h4><a href="{{ site.baseurl }}/2026/04/19/netscaler_cve2026-3055">CitrixBleed 3 The Franchise Nobody Asked For (CVE-2026-3055)</a></h4>
+    <h4><a href="{{ site.baseurl }}/2026/04/19/netscaler_cve2026-3055">CitrixBleed 3: The Franchise Nobody Asked For</a></h4>
     <span class="post-date">Published: April  19, 2026</span>
     <p>When your identity provider starts giving away memories it was supposed to keep</p>
     <div class="post-tags">
