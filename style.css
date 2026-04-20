@@ -375,7 +375,6 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: break-all;
 }
 
 pre code {
@@ -388,7 +387,6 @@ pre code {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: break-all;
 }
 
 pre::before {
